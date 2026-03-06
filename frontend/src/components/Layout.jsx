@@ -1,8 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Kalau sudah login, klik logo/home redirect ke dashboard sesuai role
+  const handleHomeClick = (e) => {
+    if (user) {
+      e.preventDefault();
+      navigate(user.role === "admin" ? "/admin" : "/user", { replace: true });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -12,7 +21,7 @@ export default function Layout({ children }) {
           <div className="flex justify-between h-16">
             {/* Logo & Brand */}
             <div className="flex items-center">
-              <Link to="/" className="flex items-center gap-2">
+              <Link to="/" onClick={handleHomeClick} className="flex items-center gap-2">
                 <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -26,13 +35,16 @@ export default function Layout({ children }) {
 
             {/* Navigation Links */}
             <div className="flex items-center gap-2">
-              <Link
-                to="/"
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium"
-              >
-                Home
-              </Link>
-              
+              {/* Tampilkan Home hanya kalau belum login */}
+              {!user && (
+                <Link
+                  to="/"
+                  className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+                >
+                  Home
+                </Link>
+              )}
+
               {user?.role === "admin" && (
                 <Link
                   to="/admin"
@@ -44,7 +56,7 @@ export default function Layout({ children }) {
                   Dashboard
                 </Link>
               )}
-              
+
               {user?.role === "user" && (
                 <Link
                   to="/user"
@@ -56,7 +68,7 @@ export default function Layout({ children }) {
                   My Dashboard
                 </Link>
               )}
-              
+
               {!user && (
                 <Link
                   to="/login"
@@ -68,7 +80,7 @@ export default function Layout({ children }) {
                   Login
                 </Link>
               )}
-              
+
               {user && (
                 <div className="flex items-center gap-3 ml-2">
                   {/* User Avatar */}
@@ -79,13 +91,13 @@ export default function Layout({ children }) {
                       </span>
                     </div>
                     <span className="text-sm font-medium text-gray-700 hidden sm:block">
-                      {user.name || user.email?.split('@')[0]}
+                      {user.name || user.email?.split("@")[0]}
                     </span>
                     <span className="text-xs px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full capitalize">
                       {user.role}
                     </span>
                   </div>
-                  
+
                   {/* Logout Button */}
                   <button
                     onClick={logout}
