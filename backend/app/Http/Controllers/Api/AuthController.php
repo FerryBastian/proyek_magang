@@ -91,6 +91,7 @@ class AuthController extends Controller
             'message' => 'Logged out successfully',
         ], 200);
     }
+
     /**
      * Google OAuth using ID token from React (Google Identity Services).
      */
@@ -129,8 +130,9 @@ class AuthController extends Controller
         }
 
         $googleId = $payload['sub'] ?? null;
-        $email = $payload['email'] ?? null;
-        $name = $payload['name'] ?? ($payload['given_name'] ?? 'Google User');
+        $email    = $payload['email'] ?? null;
+        $name     = $payload['name'] ?? ($payload['given_name'] ?? 'Google User');
+        $avatar   = $payload['picture'] ?? null; // ← foto profil Google
 
         if (!$googleId || !$email) {
             throw ValidationException::withMessages([
@@ -146,15 +148,17 @@ class AuthController extends Controller
         if ($user) {
             $user->forceFill([
                 'google_id' => $googleId,
-                'name' => $user->name ?: $name,
+                'name'      => $user->name ?: $name,
+                'avatar'    => $avatar, // ← update foto setiap login
             ])->save();
         } else {
             $user = User::create([
-                'name' => $name,
-                'email' => $email,
+                'name'      => $name,
+                'email'     => $email,
                 'google_id' => $googleId,
-                'role' => 'user',
-                'password' => bcrypt(Str::random(32)),
+                'avatar'    => $avatar,
+                'role'      => 'user',
+                'password'  => bcrypt(Str::random(32)),
             ]);
         }
 
@@ -163,9 +167,9 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Logged in with Google',
-            'token' => $token,
-            'user' => $user,
-            'role' => $user->role,
+            'token'   => $token,
+            'user'    => $user,
+            'role'    => $user->role,
         ], 200);
     }
 }

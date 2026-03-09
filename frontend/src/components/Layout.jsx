@@ -85,7 +85,22 @@ export default function Layout({ children }) {
                 <div className="flex items-center gap-3 ml-2">
                   {/* User Avatar */}
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-full">
-                    <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.style.display = "none";
+                          e.target.nextSibling.style.display = "flex";
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full items-center justify-center"
+                      style={{ display: user.avatar ? "none" : "flex" }}
+                    >
                       <span className="text-white text-sm font-semibold">
                         {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
                       </span>

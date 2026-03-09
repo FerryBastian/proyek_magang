@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { submissionsApi, userApi } from "../services/api";
 import API from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function UserDashboard() {
+  const { user } = useAuth();
   // Form state
   const [workshopId, setWorkshopId]     = useState("");
   const [divisionId, setDivisionId]     = useState("");
@@ -366,7 +368,7 @@ export default function UserDashboard() {
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={labelStyle}>Keterangan Tambahan</label>
                   <textarea value={content} onChange={(e) => setContent(e.target.value)}
-                    placeholder="Apakah ada dilokal atatu harus online, sertakan nama toko."
+                    placeholder="Informasi tambahan lainnya jika diperlukan..."
                     rows={3}
                     style={{ ...inputStyle(content), resize: "none", lineHeight: 1.6 }}
                     onFocus={e => e.target.style.border = "2px solid #4F46E5"}

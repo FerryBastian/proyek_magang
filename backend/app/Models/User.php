@@ -19,7 +19,8 @@ class User extends Authenticatable
         'email',
         'password',
         'google_id',
-        'role', // 🔥 TAMBAHKAN INI
+        'role',
+        'avatar',
     ];
 
     /**
