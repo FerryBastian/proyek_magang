@@ -53,7 +53,7 @@ export function AuthProvider({ children }) {
       // tetap logout meski request gagal
     } finally {
       setUser(null);
-      navigate("/login", { replace: true });
+      navigate("/ ", { replace: true });
     }
   };
 
