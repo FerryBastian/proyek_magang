@@ -1,3 +1,4 @@
+import socket from "../services/socket";
 import { useEffect, useState } from "react";
 import { adminApi } from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -130,6 +131,12 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  // Users modal state
+  const [showUsersModal, setShowUsersModal] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
 
   // Workshop state
   const [workshops, setWorkshops] = useState([]);
@@ -165,6 +172,27 @@ export default function AdminDashboard() {
     API.get("/admin/divisions").then((res) => setDivisions(res.data)).catch(console.log);
   };
 
+  const fetchUsers = () => {
+    setUsersLoading(true);
+    API.get("/admin/users")
+      .then((res) => setUsers(res.data))
+      .catch(console.log)
+      .finally(() => setUsersLoading(false));
+  };
+
+  const handleOpenUsers = () => {
+    setShowUsersModal(true);
+    fetchUsers();
+  };
+
+  const handleFilterByStatus = (status) => {
+    setStatusFilter(status);
+    setActiveTab("submissions");
+    setTimeout(() => {
+      document.getElementById("submissions-table")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
   useEffect(() => {
     fetchSubmissions();
     fetchWorkshops();
@@ -179,6 +207,15 @@ export default function AdminDashboard() {
       setData((prev) => prev.map((item) => item.id === id ? { ...item, status: newStatus } : item));
       if (selectedItem?.id === id) setSelectedItem((prev) => ({ ...prev, status: newStatus }));
       adminApi.getDashboard().then((res) => setDashboardData(res.data));
+
+      // Kirim notifikasi ke semua user lewat Socket.IO
+      const updatedItem = data.find((item) => item.id === id);
+      socket.emit("notifikasi", {
+        id: id,
+        title: updatedItem?.title || "Pengajuan",
+        status: newStatus,
+      });
+
     } catch (err) { console.log(err); }
     finally { setUpdatingId(null); }
   };
@@ -281,8 +318,70 @@ export default function AdminDashboard() {
     return <span className={`px-2 py-1 rounded-full text-xs font-semibold ${c.bg} ${c.text}`}>{c.label}</span>;
   };
 
+  // Data yang sudah difilter
+  const filteredData = data.filter(item =>
+    statusFilter === "all" || item.status?.toLowerCase() === statusFilter
+  );
+
   return (
     <div className="space-y-8">
+
+      {/* Modal Users */}
+      {showUsersModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+          onClick={() => setShowUsersModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-white text-lg">👥</div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-800">Daftar Users</h3>
+                  <p className="text-xs text-gray-400">{users.length} user terdaftar</p>
+                </div>
+              </div>
+              <button onClick={() => setShowUsersModal(false)}
+                className="text-gray-400 hover:text-gray-600 text-2xl font-light">×</button>
+            </div>
+            <div className="p-6">
+              {usersLoading ? (
+                <div className="text-center py-8">
+                  <svg className="animate-spin h-8 w-8 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <p className="text-gray-400 mt-2 text-sm">Memuat data users...</p>
+                </div>
+              ) : users.length === 0 ? (
+                <div className="text-center py-8 text-gray-400">Belum ada user terdaftar</div>
+              ) : (
+                <div className="space-y-3">
+                  {users.map((u) => (
+                    <div key={u.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-indigo-50 transition-colors">
+                      <div className="w-10 h-10 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-sm font-bold">{u.name?.charAt(0).toUpperCase()}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800">{u.name}</p>
+                        <p className="text-xs text-gray-400">{u.email}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-full">
+                          {u.role || "user"}
+                        </span>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(u.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Detail Submission */}
       {selectedItem && (
@@ -401,7 +500,47 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold mb-2">Admin Dashboard</h2>
-            <p className="text-indigo-100">Welcome back, <span className="font-semibold">{dashboardData?.admin?.name || user?.name || "Admin"}</span>!</p>
+           <p className="text-indigo-100">Welcome back, <span className="font-semibold">{dashboardData?.admin?.name || user?.name || "Admin"}</span>!</p>
+<div className="flex items-center gap-1 mt-2">
+  
+  <span style={{
+    fontWeight: 900,
+    fontSize: 18,
+    letterSpacing: 2,
+    color: "#fff",
+    fontFamily: "sans-serif"
+  }}>
+    DTECH-EN
+  </span>
+  <span style={{
+    fontWeight: 900,
+    fontSize: 18,
+    letterSpacing: 2,
+    color: "#38BDF8",
+    fontFamily: "sans-serif"
+  }}>
+    G
+  </span>
+  <span style={{
+    fontWeight: 900,
+    fontSize: 18,
+    letterSpacing: 2,
+    color: "#fff",
+    fontFamily: "sans-serif"
+  }}>
+    INEERIN
+  </span>
+  <span style={{
+    fontWeight: 900,
+    fontSize: 18,
+    letterSpacing: 2,
+    color: "#38BDF8",
+    fontFamily: "sans-serif"
+  }}>
+    G
+  </span>
+</div>
+
           </div>
           <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -414,13 +553,15 @@ export default function AdminDashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
-          { label: "Total Users",       value: dashboardData?.stats?.total_users,       bg: "bg-blue-100",   icon: "text-blue-600",   iconPath: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" },
-          { label: "Total Submissions", value: dashboardData?.stats?.total_submissions, bg: "bg-purple-100", icon: "text-purple-600", iconPath: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
-          { label: "Pending",           value: dashboardData?.stats?.pending_count,     bg: "bg-yellow-100", icon: "text-yellow-600", iconPath: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-          { label: "Approved",          value: dashboardData?.stats?.approved_count,    bg: "bg-green-100",  icon: "text-green-600",  iconPath: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
-          { label: "Rejected",          value: dashboardData?.stats?.rejected_count,    bg: "bg-red-100",    icon: "text-red-600",    iconPath: "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" },
+          { label: "Total Users",       value: dashboardData?.stats?.total_users,       bg: "bg-blue-100",   icon: "text-blue-600",   iconPath: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z",       onClick: handleOpenUsers },
+          { label: "Total Submissions", value: dashboardData?.stats?.total_submissions, bg: "bg-purple-100", icon: "text-purple-600", iconPath: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", onClick: () => handleFilterByStatus("all") },
+          { label: "Pending",           value: dashboardData?.stats?.pending_count,     bg: "bg-yellow-100", icon: "text-yellow-600", iconPath: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",                                                                           onClick: () => handleFilterByStatus("pending") },
+          { label: "Approved",          value: dashboardData?.stats?.approved_count,    bg: "bg-green-100",  icon: "text-green-600",  iconPath: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",                                                                         onClick: () => handleFilterByStatus("approved") },
+          { label: "Rejected",          value: dashboardData?.stats?.rejected_count,    bg: "bg-red-100",    icon: "text-red-600",    iconPath: "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z",                                                   onClick: () => handleFilterByStatus("rejected") },
         ].map((stat) => (
-          <div key={stat.label} className="bg-white rounded-2xl shadow-lg p-5 border border-gray-100">
+          <div key={stat.label}
+            className="bg-white rounded-2xl shadow-lg p-5 border border-gray-100 cursor-pointer hover:border-indigo-300 hover:shadow-xl transition-all"
+            onClick={stat.onClick}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-xs font-medium">{stat.label}</p>
@@ -455,7 +596,7 @@ export default function AdminDashboard() {
 
       {/* ── TAB: SUBMISSIONS ── */}
       {activeTab === "submissions" && (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div id="submissions-table" className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           <div className="p-6 border-b border-gray-100 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
@@ -465,7 +606,17 @@ export default function AdminDashboard() {
               </div>
               <h3 className="text-xl font-bold text-gray-800">Semua Pengajuan</h3>
             </div>
-            <span className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">{data.length} total</span>
+            <div className="flex items-center gap-2">
+              {statusFilter !== "all" && (
+                <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold capitalize flex items-center gap-1">
+                  Filter: {statusFilter}
+                  <button onClick={() => setStatusFilter("all")} className="ml-1 hover:text-red-500 font-bold">×</button>
+                </span>
+              )}
+              <span className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                {filteredData.length} total
+              </span>
+            </div>
           </div>
 
           {loading ? (
@@ -476,9 +627,14 @@ export default function AdminDashboard() {
               </svg>
               <p className="text-gray-500 mt-4">Loading submissions...</p>
             </div>
-          ) : data.length === 0 ? (
+          ) : filteredData.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-gray-500 text-lg">Belum ada pengajuan</p>
+              <p className="text-gray-500 text-lg">Tidak ada pengajuan {statusFilter !== "all" ? `dengan status "${statusFilter}"` : ""}</p>
+              {statusFilter !== "all" && (
+                <button onClick={() => setStatusFilter("all")} className="mt-4 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-xl text-sm font-semibold hover:bg-indigo-200 transition-all">
+                  Lihat Semua
+                </button>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -491,7 +647,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {data.map((item) => (
+                  {filteredData.map((item) => (
                     <tr key={item.id} className="hover:bg-gray-50 transition-colors cursor-pointer"
                       onClick={() => setSelectedItem(item)}>
                       <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>

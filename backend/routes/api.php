@@ -68,6 +68,13 @@ Route::prefix('v1')->name('v1.')->group(function () {
                 ]);
             })->name('admin.dashboard');
 
+            // Users list
+            Route::get('/admin/users', function () {
+                return response()->json(
+                    User::where('role', 'user')->latest()->get()
+                );
+            })->name('admin.users.index');
+
             // Submissions
             Route::get('/admin/submissions', function () {
                 return response()->json(

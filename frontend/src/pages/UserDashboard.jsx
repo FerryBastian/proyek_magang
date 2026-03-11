@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { submissionsApi, userApi } from "../services/api";
 import API from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import socket from "../services/socket";
 
 export default function UserDashboard() {
   const { user } = useAuth();
@@ -32,13 +33,25 @@ export default function UserDashboard() {
   const [successMsg, setSuccessMsg]     = useState("");
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
+useEffect(() => {
     userApi.getDashboard().then((res) => setDashboardData(res.data)).catch(console.log);
     submissionsApi.mySubmissions().then((res) => setSubmissions(res.data)).catch(console.log);
-
-    // Ambil data dropdown workshop & divisi
     API.get("/workshops").then((res) => setWorkshops(res.data)).catch(console.log);
     API.get("/divisions").then((res) => setDivisions(res.data)).catch(console.log);
+
+    // Dengarkan notifikasi dari Socket.IO
+    socket.on("notifikasi", (data) => {
+      console.log("Notifikasi masuk:", data);
+      // Refresh data submissions otomatis
+      submissionsApi.mySubmissions().then((res) => setSubmissions(res.data)).catch(console.log);
+      // Tampilkan pesan notifikasi
+      setSuccessMsg(`🔔 Status pengajuan "${data.title}" telah diupdate menjadi: ${data.status}`);
+    });
+
+    // Cleanup saat komponen dilepas
+    return () => {
+      socket.off("notifikasi");
+    };
   }, []);
 
   const resetForm = () => {
