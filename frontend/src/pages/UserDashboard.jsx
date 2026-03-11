@@ -33,13 +33,14 @@ export default function UserDashboard() {
   const [successMsg, setSuccessMsg]     = useState("");
   const fileInputRef = useRef(null);
 
-useEffect(() => {
+  useEffect(() => {
     userApi.getDashboard().then((res) => setDashboardData(res.data)).catch(console.log);
     submissionsApi.mySubmissions().then((res) => setSubmissions(res.data)).catch(console.log);
     API.get("/workshops").then((res) => setWorkshops(res.data)).catch(console.log);
     API.get("/divisions").then((res) => setDivisions(res.data)).catch(console.log);
 
-    // Dengarkan notifikasi dari Socket.IO
+    // Koneksikan socket dan dengarkan notifikasi
+    socket.connect();
     socket.on("notifikasi", (data) => {
       console.log("Notifikasi masuk:", data);
       // Refresh data submissions otomatis
@@ -51,6 +52,7 @@ useEffect(() => {
     // Cleanup saat komponen dilepas
     return () => {
       socket.off("notifikasi");
+      socket.disconnect();
     };
   }, []);
 
@@ -517,7 +519,6 @@ useEffect(() => {
                           display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22
                         }}>📦</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          {/* Title + badges */}
                           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
                             <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#1E1B4B" }}>{item.title}</h4>
                             <span style={{
@@ -529,8 +530,6 @@ useEffect(() => {
                               background: `${uc.color}15`, color: uc.color, border: `1px solid ${uc.color}40`
                             }}>{uc.icon} {uc.label}</span>
                           </div>
-
-                          {/* Info row */}
                           <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", marginBottom: 6 }}>
                             {item.quantity && (
                               <span style={{ fontSize: 12, color: "#6B7280" }}>📦 {item.quantity} {item.unit}</span>
@@ -548,8 +547,6 @@ useEffect(() => {
                               🕐 {new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                             </span>
                           </div>
-
-                          {/* Kegunaan */}
                           {item.kegunaan && (
                             <p style={{
                               margin: 0, fontSize: 13, color: "#6B7280", lineHeight: 1.5,

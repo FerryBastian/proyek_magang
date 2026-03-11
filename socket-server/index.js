@@ -3,11 +3,13 @@ const http = require('http');
 const { Server } = require('socket.io');
 
 const app = express();
+app.use(express.json());
+
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*", // nanti diganti URL frontend kamu
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
@@ -15,16 +17,30 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('User terhubung:', socket.id);
 
-  // Dengarkan event dari Laravel
-  socket.on('notifikasi', (data) => {
-    console.log('Notifikasi masuk:', data);
-    // Kirim ke semua client yang terhubung
-    io.emit('notifikasi', data);
-  });
-
   socket.on('disconnect', () => {
     console.log('User terputus:', socket.id);
   });
+});
+
+// Endpoint dipanggil Laravel saat status berubah
+app.post('/emit-status', (req, res) => {
+  const { user_id, submission_id, status, title } = req.body;
+
+  if (!submission_id || !status) {
+    return res.status(400).json({ message: 'Data tidak lengkap' });
+  }
+
+  // Broadcast ke semua client (sesuai implementasi teman)
+  io.emit('notifikasi', {
+    id: submission_id,
+    user_id,
+    status,
+    title,
+  });
+
+  console.log('Emit notifikasi:', { submission_id, status, title });
+
+  return res.json({ message: 'Event dikirim' });
 });
 
 server.listen(3001, () => {

@@ -1,6 +1,6 @@
 # 📦 Submission App
 
-Aplikasi pengajuan barang berbasis web dengan notifikasi WhatsApp otomatis. Dibangun menggunakan **Laravel** (backend), **React + Vite** (frontend), dan **Go WhatsApp Web Multidevice** (WA gateway).
+Aplikasi pengajuan barang berbasis web dengan notifikasi WhatsApp otomatis dan update status realtime. Dibangun menggunakan **Laravel** (backend), **React + Vite** (frontend), **Go WhatsApp Web Multidevice** (WA gateway), dan **Socket.io** (realtime).
 
 ---
 
@@ -16,6 +16,7 @@ Aplikasi pengajuan barang berbasis web dengan notifikasi WhatsApp otomatis. Diba
   - PIC & nomor telepon
   - Referensi link & upload gambar/PDF referensi
 - 📊 **Riwayat Pengajuan** — User dapat melihat status semua pengajuan miliknya
+- 🔔 **Notifikasi Realtime** — Status pengajuan berubah otomatis di browser user tanpa refresh via Socket.io
 - 📱 **Notifikasi WhatsApp Otomatis** — Setiap pengajuan masuk, admin langsung mendapat notifikasi WA lengkap via Gowa (self-hosted)
 - 🛡️ **Role-based Access** — Role `user` dan `admin` dengan akses berbeda
 - 🛠️ **Admin Dashboard** — Admin dapat:
@@ -32,6 +33,7 @@ Aplikasi pengajuan barang berbasis web dengan notifikasi WhatsApp otomatis. Diba
 monorepo/
 ├── backend/        # Laravel 11 — REST API
 ├── frontend/       # React + Vite — SPA
+├── socket-server/  # Node.js + Socket.io — Realtime Server
 └── gowa/           # Go WhatsApp Web Multidevice — WA Gateway
 ```
 
@@ -42,7 +44,8 @@ monorepo/
 | Layer | Teknologi |
 |-------|-----------|
 | Backend | Laravel 11, Sanctum, MySQL |
-| Frontend | React 18, Vite, Tailwind CSS, Axios |
+| Frontend | React 18, Vite, Axios |
+| Realtime | Node.js, Socket.io |
 | WA Gateway | Go WhatsApp Web Multidevice (Gowa) |
 | Auth | Laravel Sanctum (token-based) + Google OAuth |
 
@@ -64,8 +67,8 @@ Pastikan sudah terinstall:
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/FerryBastian/proyek_magang.git
-cd proyek_magang
+git clone https://github.com/FerryBastian/sistem-pengajuan-barang-whatsapp.git
+cd sistem-pengajuan-barang-whatsapp
 ```
 
 ---
@@ -131,11 +134,23 @@ Edit file `.env`:
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 VITE_BACKEND_APP_URL=http://localhost:8000
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
+VITE_SOCKET_URL=http://localhost:3001
 ```
 
 ---
 
-### 4. Setup Gowa (WA Gateway)
+### 4. Setup Socket Server
+
+```bash
+cd ../socket-server
+npm install
+```
+
+Tidak ada konfigurasi tambahan — socket server berjalan di port `3001` secara default.
+
+---
+
+### 5. Setup Gowa (WA Gateway)
 
 ```bash
 cd ../gowa
@@ -164,7 +179,7 @@ Gowa akan berjalan di `http://localhost:3000`. Buka di browser, lalu scan QR cod
 
 ## 🚀 Cara Menjalankan Project
 
-Jalankan ketiga service secara bersamaan di terminal terpisah:
+Jalankan keempat service secara bersamaan di terminal terpisah:
 
 **Terminal 1 — Backend:**
 ```bash
@@ -180,7 +195,14 @@ npm run dev
 # Berjalan di http://localhost:5173
 ```
 
-**Terminal 3 — Gowa:**
+**Terminal 3 — Socket Server:**
+```bash
+cd socket-server
+node index.js
+# Berjalan di http://localhost:3001
+```
+
+**Terminal 4 — Gowa:**
 ```bash
 cd gowa
 docker compose up -d
@@ -216,6 +238,7 @@ Buka browser ke `http://localhost:5173`.
 | `VITE_API_BASE_URL` | Base URL API Laravel (contoh: `http://localhost:8000/api/v1`) |
 | `VITE_BACKEND_APP_URL` | URL backend untuk akses file storage |
 | `VITE_GOOGLE_CLIENT_ID` | Client ID Google OAuth |
+| `VITE_SOCKET_URL` | URL Socket.io server (default: `http://localhost:3001`) |
 
 ### Gowa (`gowa/src/.env`)
 
@@ -262,7 +285,7 @@ Base URL: `http://localhost:8000/api/v1`
 |--------|----------|-----------|------|
 | GET | `/admin/dashboard` | Statistik dashboard admin | ✅ Admin |
 | GET | `/admin/submissions` | Semua pengajuan (with user, workshop, division) | ✅ Admin |
-| PATCH | `/admin/submissions/{id}/status` | Update status pengajuan | ✅ Admin |
+| PATCH | `/admin/submissions/{id}/status` | Update status + emit Socket.io | ✅ Admin |
 
 ### Admin — Workshop CRUD
 
@@ -286,43 +309,21 @@ Base URL: `http://localhost:8000/api/v1`
 
 ---
 
-## 👤 Manajemen Role
+## 🔔 Alur Notifikasi Realtime (Socket.io)
 
-Role user di-set manual via Laravel Tinker setelah migrasi:
-
-```bash
-php artisan tinker
 ```
-
-```php
-// Set user sebagai admin
-\App\Models\User::where('email', 'emailadmin@gmail.com')->update(['role' => 'admin']);
-
-// Set user kembali ke user biasa
-\App\Models\User::where('email', 'email@gmail.com')->update(['role' => 'user']);
+Admin ubah status pengajuan
+        ↓
+Laravel update status di database
+        ↓
+Laravel POST ke Socket Server (http://localhost:3001/emit-status)
+        ↓
+Socket Server broadcast event 'notifikasi' ke semua client
+        ↓
+Browser user menerima event
+        ↓
+Status berubah otomatis + notifikasi 🔔 muncul tanpa refresh
 ```
-
----
-
-## 📦 Format Pengajuan Barang
-
-Form pengajuan dikirim menggunakan `multipart/form-data` karena mendukung upload file. Field yang tersedia:
-
-| Field | Tipe | Wajib | Keterangan |
-|-------|------|-------|------------|
-| `workshop_id` | integer | ❌ | ID workshop dari dropdown |
-| `division_id` | integer | ❌ | ID divisi dari dropdown |
-| `title` | string | ✅ | Nama barang |
-| `quantity` | integer | ✅ | Jumlah barang |
-| `unit` | string | ❌ | Satuan (default: `pcs`) |
-| `spesifikasi` | string | ❌ | Spesifikasi teknis barang |
-| `kegunaan` | string | ✅ | Kegunaan barang |
-| `content` | string | ❌ | Keterangan tambahan |
-| `urgency` | enum | ✅ | `standart` / `urgent` / `emergency` |
-| `pic` | string | ✅ | Nama penanggung jawab |
-| `nomor_telepon` | string | ❌ | Nomor telepon PIC |
-| `referensi_link` | url | ❌ | Link referensi barang |
-| `referensi_gambar` | file | ❌ | Gambar/PDF referensi (max 10MB) |
 
 ---
 
@@ -365,6 +366,46 @@ Contoh pesan WA yang diterima admin:
 *Tanggal:* 7 Maret 2026, 02:17
 *ID Pengajuan:* #1
 ```
+
+---
+
+## 👤 Manajemen Role
+
+Role user di-set manual via Laravel Tinker setelah migrasi:
+
+```bash
+php artisan tinker
+```
+
+```php
+// Set user sebagai admin
+\App\Models\User::where('email', 'emailadmin@gmail.com')->update(['role' => 'admin']);
+
+// Set user kembali ke user biasa
+\App\Models\User::where('email', 'email@gmail.com')->update(['role' => 'user']);
+```
+
+---
+
+## 📦 Format Pengajuan Barang
+
+Form pengajuan dikirim menggunakan `multipart/form-data` karena mendukung upload file. Field yang tersedia:
+
+| Field | Tipe | Wajib | Keterangan |
+|-------|------|-------|------------|
+| `workshop_id` | integer | ❌ | ID workshop dari dropdown |
+| `division_id` | integer | ❌ | ID divisi dari dropdown |
+| `title` | string | ✅ | Nama barang |
+| `quantity` | integer | ✅ | Jumlah barang |
+| `unit` | string | ❌ | Satuan (default: `pcs`) |
+| `spesifikasi` | string | ❌ | Spesifikasi teknis barang |
+| `kegunaan` | string | ✅ | Kegunaan barang |
+| `content` | string | ❌ | Keterangan tambahan |
+| `urgency` | enum | ✅ | `standart` / `urgent` / `emergency` |
+| `pic` | string | ✅ | Nama penanggung jawab |
+| `nomor_telepon` | string | ❌ | Nomor telepon PIC |
+| `referensi_link` | url | ❌ | Link referensi barang |
+| `referensi_gambar` | file | ❌ | Gambar/PDF referensi (max 10MB) |
 
 ---
 

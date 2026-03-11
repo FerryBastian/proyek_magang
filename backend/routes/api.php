@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\SubmissionController;
 use App\Http\Controllers\Api\WorkshopController;
 use App\Http\Controllers\Api\DivisionController;
+use App\Http\Controllers\Api\AdminController;
 use App\Models\Submission;
 use App\Models\User;
 
@@ -54,19 +55,8 @@ Route::prefix('v1')->name('v1.')->group(function () {
         Route::middleware('role:admin')->group(function () {
 
             // Dashboard
-            Route::get('/admin/dashboard', function (Request $request) {
-                return response()->json([
-                    'message' => 'Welcome Admin',
-                    'admin'   => $request->user(),
-                    'stats'   => [
-                        'total_users'       => User::where('role', 'user')->count(),
-                        'total_submissions' => Submission::count(),
-                        'pending_count'     => Submission::where('status', 'pending')->count(),
-                        'approved_count'    => Submission::where('status', 'approved')->count(),
-                        'rejected_count'    => Submission::where('status', 'rejected')->count(),
-                    ],
-                ]);
-            })->name('admin.dashboard');
+            Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
+                ->name('admin.dashboard');
 
             // Users list
             Route::get('/admin/users', function () {
@@ -76,22 +66,12 @@ Route::prefix('v1')->name('v1.')->group(function () {
             })->name('admin.users.index');
 
             // Submissions
-            Route::get('/admin/submissions', function () {
-                return response()->json(
-                    Submission::with(['user', 'workshop', 'division'])->latest()->get()
-                );
-            })->name('admin.submissions.index');
+            Route::get('/admin/submissions', [AdminController::class, 'submissions'])
+                ->name('admin.submissions.index');
 
-            Route::patch('/admin/submissions/{submission}/status', function (Request $request, Submission $submission) {
-                $request->validate([
-                    'status' => 'required|in:pending,review,approved,rejected',
-                ]);
-                $submission->update(['status' => $request->status]);
-                return response()->json([
-                    'message' => 'Status updated',
-                    'data'    => $submission->load(['user', 'workshop', 'division']),
-                ]);
-            })->name('admin.submissions.status');
+            // Status update — pakai AdminController agar bisa emit socket
+            Route::patch('/admin/submissions/{submission}/status', [AdminController::class, 'updateStatus'])
+                ->name('admin.submissions.status');
 
             // Workshop CRUD
             Route::get('/admin/workshops', [WorkshopController::class, 'adminIndex'])->name('admin.workshops.index');
