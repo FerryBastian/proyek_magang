@@ -7,7 +7,7 @@ import API from "../services/api";
 // ── Komponen ini HARUS di luar AdminDashboard agar focus input tidak hilang ──
 function CrudForm({ title, form, setForm, onSubmit, editing, onCancelEdit, loading: formLoading }) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 mb-4 sm:mb-6">
       <h4 className="text-base font-bold text-gray-800 mb-4">
         {editing ? `✏️ Edit ${title}` : `➕ Tambah ${title} Baru`}
       </h4>
@@ -324,7 +324,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
 
       {/* Modal Users */}
       {showUsersModal && (
@@ -405,7 +405,7 @@ export default function AdminDashboard() {
                 {getStatusBadge(selectedItem.status)}
                 {getUrgencyBadge(selectedItem.urgency)}
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
                   { label: "Pengaju",     value: selectedItem.user?.name },
                   { label: "Email",       value: selectedItem.user?.email, isEmail: true },

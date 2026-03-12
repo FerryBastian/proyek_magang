@@ -145,7 +145,7 @@ export default function UserDashboard() {
   const isFormValid = title && kegunaan && quantity && pic;
 
   return (
-    <div style={{ fontFamily: "'Sora', 'Plus Jakarta Sans', sans-serif", background: "#F8F7FF", minHeight: "100vh" }}>
+    <div className="min-h-screen" style={{ fontFamily: "'Sora', 'Plus Jakarta Sans', sans-serif", background: "#F8F7FF" }}>
       <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
       <style>{`
         * { box-sizing: border-box; }
@@ -168,76 +168,72 @@ export default function UserDashboard() {
         select option { color: #1E1B4B; }
       `}</style>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px" }}>
+      <div className="max-w-5xl mx-auto px-3 sm:px-4 md:px-6 py-5 sm:py-8">
 
         {/* Header */}
         {dashboardData && (
-          <div className="fade-in" style={{
+          <div className="fade-in rounded-2xl p-5 sm:p-7 md:p-8 mb-6 sm:mb-7" style={{
             background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #A855F7 100%)",
-            borderRadius: 20, padding: "28px 32px", marginBottom: 28,
             boxShadow: "0 16px 48px rgba(99,102,241,0.3)",
-            display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              <div style={{
-                width: 56, height: 56, borderRadius: "50%",
-                background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                border: "2px solid rgba(255,255,255,0.3)", fontSize: 22, fontWeight: 700, color: "#fff"
-              }}>
-                {(dashboardData?.name || dashboardData?.user?.name || "U")[0].toUpperCase()}
-              </div>
-              <div>
-                <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, margin: 0 }}>Selamat datang kembali 👋</p>
-                <h2 style={{ color: "#fff", fontSize: 22, fontWeight: 700, margin: "2px 0 0" }}>
-                  {dashboardData?.name || dashboardData?.user?.name}
-                </h2>
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              {[
-                { label: "Total",     value: stats.total,    color: "rgba(255,255,255,0.25)" },
-                { label: "Menunggu",  value: stats.pending,  color: "rgba(251,191,36,0.3)" },
-                { label: "Disetujui", value: stats.approved, color: "rgba(34,197,94,0.3)" },
-              ].map((s) => (
-                <div key={s.label} style={{
-                  background: s.color, borderRadius: 12, padding: "10px 18px", textAlign: "center",
-                  border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(10px)"
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0" style={{
+                  background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  border: "2px solid rgba(255,255,255,0.3)", fontSize: 20, fontWeight: 700, color: "#fff"
                 }}>
-                  <div style={{ color: "#fff", fontSize: 22, fontWeight: 800 }}>{s.value}</div>
-                  <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: 500 }}>{s.label}</div>
+                  {(dashboardData?.name || dashboardData?.user?.name || "U")[0].toUpperCase()}
                 </div>
-              ))}
+                <div>
+                  <p className="text-white/70 text-xs sm:text-sm">Selamat datang kembali 👋</p>
+                  <h2 className="text-white text-lg sm:text-xl md:text-2xl font-bold mt-0.5">
+                    {dashboardData?.name || dashboardData?.user?.name}
+                  </h2>
+                </div>
+              </div>
+              <div className="flex gap-2 sm:gap-3 flex-wrap">
+                {[
+                  { label: "Total",     value: stats.total,    color: "rgba(255,255,255,0.25)" },
+                  { label: "Menunggu",  value: stats.pending,  color: "rgba(251,191,36,0.3)" },
+                  { label: "Disetujui", value: stats.approved, color: "rgba(34,197,94,0.3)" },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-xl px-3 sm:px-4 py-2 text-center backdrop-blur" style={{
+                    background: s.color, border: "1px solid rgba(255,255,255,0.2)"
+                  }}>
+                    <div className="text-white text-lg sm:text-xl font-extrabold">{s.value}</div>
+                    <div className="text-white/75 text-[10px] sm:text-xs font-medium">{s.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         {/* Success Message */}
         {successMsg && (
-          <div className="fade-in" style={{
-            background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 12,
-            padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 10
+          <div className="fade-in rounded-xl p-3 sm:p-4 mb-4 sm:mb-5 flex items-start gap-2 sm:gap-3" style={{
+            background: "#F0FDF4", border: "1px solid #BBF7D0"
           }}>
-            <span style={{ fontSize: 20 }}>✅</span>
-            <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#15803D" }}>{successMsg}</p>
-            <button onClick={() => setSuccessMsg("")} style={{
-              marginLeft: "auto", background: "none", border: "none", color: "#15803D", cursor: "pointer", fontSize: 18
+            <span className="text-lg sm:text-xl">✅</span>
+            <p className="text-sm font-semibold flex-1" style={{ margin: 0, color: "#15803D" }}>{successMsg}</p>
+            <button onClick={() => setSuccessMsg("")} className="text-2xl leading-none" style={{
+              background: "none", border: "none", color: "#15803D", cursor: "pointer"
             }}>×</button>
           </div>
         )}
 
         {/* Tab Navigation */}
-        <div style={{
-          display: "flex", gap: 8, marginBottom: 24,
+        <div className="flex gap-2 mb-5 sm:mb-6 overflow-x-auto pb-2" style={{
           background: "#fff", borderRadius: 14, padding: 6,
-          boxShadow: "0 2px 12px rgba(0,0,0,0.06)", width: "fit-content"
+          boxShadow: "0 2px 12px rgba(0,0,0,0.06)", width: "fit-content", minWidth: "100%"
         }}>
           {[
             { id: "form", icon: "📦", label: "Ajukan Barang" },
             { id: "list", icon: "📋", label: `Riwayat (${stats.total})` },
           ].map((tab) => (
-            <button key={tab.id} className="tab-btn" onClick={() => setActiveTab(tab.id)} style={{
-              padding: "10px 22px", borderRadius: 10, border: "none", fontSize: 14, fontWeight: 600,
+            <button key={tab.id} className="tab-btn whitespace-nowrap" onClick={() => setActiveTab(tab.id)} style={{
+              padding: "10px 18px", borderRadius: 10, border: "none", fontSize: 13, fontWeight: 600,
               background: activeTab === tab.id ? "linear-gradient(135deg, #4F46E5, #7C3AED)" : "transparent",
               color: activeTab === tab.id ? "#fff" : "#9CA3AF",
               boxShadow: activeTab === tab.id ? "0 4px 12px rgba(99,102,241,0.3)" : "none",
@@ -249,24 +245,22 @@ export default function UserDashboard() {
 
         {/* FORM TAB */}
         {activeTab === "form" && (
-          <div className="fade-in" style={{
-            background: "#fff", borderRadius: 20, padding: "32px",
+          <div className="fade-in bg-white rounded-2xl p-5 sm:p-6 md:p-8" style={{
             boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #F0EFFE"
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
-              <div style={{
-                width: 44, height: 44, borderRadius: 12,
+            <div className="flex items-center gap-3 mb-6 sm:mb-7">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex-shrink-0" style={{
                 background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
-                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18
               }}>📦</div>
               <div>
-                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#1E1B4B" }}>Form Pengadaan Barang</h3>
-                <p style={{ margin: 0, fontSize: 12, color: "#9CA3AF" }}>Isi semua detail barang yang ingin diajukan</p>
+                <h3 className="text-base sm:text-lg font-bold m-0" style={{ color: "#1E1B4B" }}>Form Pengadaan Barang</h3>
+                <p className="text-xs sm:text-sm m-0" style={{ color: "#9CA3AF" }}>Isi semua detail barang yang ingin diajukan</p>
               </div>
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mb-5">
 
                 {/* Workshop */}
                 <div>
@@ -295,13 +289,13 @@ export default function UserDashboard() {
                 </div>
 
                 {/* Nama Barang */}
-                <div style={{ gridColumn: "1 / -1" }}>
-                  <label style={labelStyle}>Nama Barang <span style={{ color: "#EF4444" }}>*</span></label>
-                  <div style={{ position: "relative" }}>
-                    <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>🏷️</span>
+                <div className="md:col-span-2">
+                  <label className="block text-xs sm:text-sm font-semibold mb-2" style={{ color: "#374151" }}>Nama Barang <span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base">🏷️</span>
                     <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
                       placeholder="Contoh: Laptop Dell Inspiron 15, Kursi Ergonomis..."
-                      required style={inputWithIconStyle(title)}
+                      required style={{ ...inputWithIconStyle(title), width: "100%", padding: "12px 14px", borderRadius: 12, fontSize: 14 }}
                       onFocus={e => e.target.style.border = "2px solid #4F46E5"}
                       onBlur={e => e.target.style.border = title ? "2px solid #4F46E5" : "2px solid #E9E8FF"}
                     />
@@ -356,55 +350,58 @@ export default function UserDashboard() {
                 </div>
 
                 {/* Spesifikasi */}
-                <div style={{ gridColumn: "1 / -1" }}>
-                  <label style={labelStyle}>Spesifikasi</label>
+                <div className="md:col-span-2">
+                  <label className="block text-xs sm:text-sm font-semibold mb-2" style={{ color: "#374151" }}>Spesifikasi</label>
                   <textarea value={spesifikasi} onChange={(e) => setSpesifikasi(e.target.value)}
                     placeholder="Jelaskan spesifikasi teknis barang jika ada (ukuran, warna, tipe, merek, dll)..."
                     rows={3}
-                    style={{ ...inputStyle(spesifikasi), resize: "none", lineHeight: 1.6 }}
+                    className="w-full resize-none"
+                    style={{ ...inputStyle(spesifikasi), lineHeight: 1.6 }}
                     onFocus={e => e.target.style.border = "2px solid #4F46E5"}
                     onBlur={e => e.target.style.border = spesifikasi ? "2px solid #4F46E5" : "2px solid #E9E8FF"}
                   />
                 </div>
 
                 {/* Kegunaan */}
-                <div style={{ gridColumn: "1 / -1" }}>
-                  <label style={labelStyle}>Kegunaan <span style={{ color: "#EF4444" }}>*</span></label>
+                <div className="md:col-span-2">
+                  <label className="block text-xs sm:text-sm font-semibold mb-2" style={{ color: "#374151" }}>Kegunaan <span className="text-red-500">*</span></label>
                   <textarea value={kegunaan} onChange={(e) => setKegunaan(e.target.value)}
                     placeholder="Jelaskan untuk apa barang ini digunakan..."
                     required rows={3}
-                    style={{ ...inputStyle(kegunaan), resize: "none", lineHeight: 1.6 }}
+                    className="w-full resize-none"
+                    style={{ ...inputStyle(kegunaan), lineHeight: 1.6 }}
                     onFocus={e => e.target.style.border = "2px solid #4F46E5"}
                     onBlur={e => e.target.style.border = kegunaan ? "2px solid #4F46E5" : "2px solid #E9E8FF"}
                   />
                 </div>
 
                 {/* Keterangan tambahan */}
-                <div style={{ gridColumn: "1 / -1" }}>
-                  <label style={labelStyle}>Keterangan Tambahan</label>
+                <div className="md:col-span-2">
+                  <label className="block text-xs sm:text-sm font-semibold mb-2" style={{ color: "#374151" }}>Keterangan Tambahan</label>
                   <textarea value={content} onChange={(e) => setContent(e.target.value)}
                     placeholder="Informasi tambahan lainnya jika diperlukan..."
                     rows={3}
-                    style={{ ...inputStyle(content), resize: "none", lineHeight: 1.6 }}
+                    className="w-full resize-none"
+                    style={{ ...inputStyle(content), lineHeight: 1.6 }}
                     onFocus={e => e.target.style.border = "2px solid #4F46E5"}
                     onBlur={e => e.target.style.border = content ? "2px solid #4F46E5" : "2px solid #E9E8FF"}
                   />
                 </div>
 
                 {/* Status / Urgensi */}
-                <div style={{ gridColumn: "1 / -1" }}>
-                  <label style={labelStyle}>Status <span style={{ color: "#EF4444" }}>*</span></label>
-                  <div style={{ display: "flex", gap: 10 }}>
+                <div className="md:col-span-2">
+                  <label className="block text-xs sm:text-sm font-semibold mb-2" style={{ color: "#374151" }}>Status <span className="text-red-500">*</span></label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                     {Object.entries(urgencyConfig).map(([val, u]) => (
-                      <div key={val} onClick={() => setUrgency(val)} style={{
-                        flex: 1, padding: "12px 16px", borderRadius: 12, cursor: "pointer",
+                      <div key={val} onClick={() => setUrgency(val)} className="cursor-pointer rounded-xl p-3 sm:p-4" style={{
+                        flex: 1,
                         border: urgency === val ? `2px solid ${u.color}` : "2px solid #E9E8FF",
                         background: urgency === val ? `${u.color}15` : "#FAFAFE",
                         transition: "all 0.2s"
                       }}>
-                        <div style={{ fontSize: 18, marginBottom: 2 }}>{u.icon}</div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: urgency === val ? u.color : "#374151" }}>{u.label}</div>
-                        <div style={{ fontSize: 11, color: "#9CA3AF" }}>{u.sub}</div>
+                        <div className="text-base sm:text-lg mb-0.5">{u.icon}</div>
+                        <div className="text-xs sm:text-sm font-bold" style={{ color: urgency === val ? u.color : "#374151" }}>{u.label}</div>
+                        <div className="text-[10px] sm:text-xs" style={{ color: "#9CA3AF" }}>{u.sub}</div>
                       </div>
                     ))}
                   </div>
@@ -451,26 +448,23 @@ export default function UserDashboard() {
               </div>
 
               {/* WA Notice */}
-              <div style={{
-                background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 12,
-                padding: "12px 16px", marginBottom: 20, display: "flex", alignItems: "center", gap: 10
+              <div className="rounded-xl p-3 sm:p-4 mb-4 sm:mb-5 flex items-start gap-2 sm:gap-3" style={{
+                background: "#F0FDF4", border: "1px solid #BBF7D0"
               }}>
-                <span style={{ fontSize: 20 }}>📱</span>
+                <span className="text-lg sm:text-xl">📱</span>
                 <div>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#15803D" }}>Notifikasi WhatsApp Otomatis</p>
-                  <p style={{ margin: 0, fontSize: 12, color: "#16A34A" }}>Setelah submit, notifikasi akan otomatis dikirim ke WhatsApp admin</p>
+                  <p className="text-xs sm:text-sm font-semibold m-0" style={{ color: "#15803D" }}>Notifikasi WhatsApp Otomatis</p>
+                  <p className="text-xs m-0" style={{ color: "#16A34A" }}>Setelah submit, notifikasi akan otomatis dikirim ke WhatsApp admin</p>
                 </div>
               </div>
 
-              <button type="submit" disabled={isSubmitting || !isFormValid} className="submit-btn"
-                style={{
-                  width: "100%", padding: "15px",
-                  background: isSubmitting || !isFormValid ? "#E5E7EB" : "linear-gradient(135deg, #4F46E5, #7C3AED)",
-                  color: isSubmitting || !isFormValid ? "#9CA3AF" : "#fff",
-                  border: "none", borderRadius: 14, fontSize: 15, fontWeight: 700,
-                  cursor: !isFormValid ? "not-allowed" : "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 10
-                }}>
+              <button type="submit" disabled={isSubmitting || !isFormValid} className="submit-btn w-full py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold" style={{
+                background: isSubmitting || !isFormValid ? "#E5E7EB" : "linear-gradient(135deg, #4F46E5, #7C3AED)",
+                color: isSubmitting || !isFormValid ? "#9CA3AF" : "#fff",
+                border: "none",
+                cursor: !isFormValid ? "not-allowed" : "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 10
+              }}>
                 {isSubmitting ? (
                   <>
                     <svg className="spin" width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -488,69 +482,62 @@ export default function UserDashboard() {
         {activeTab === "list" && (
           <div className="fade-in">
             {submissions.length === 0 ? (
-              <div style={{
-                background: "#fff", borderRadius: 20, padding: "60px 32px",
-                textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.06)"
+              <div className="bg-white rounded-2xl p-8 sm:p-10 md:p-12 text-center" style={{
+                boxShadow: "0 4px 24px rgba(0,0,0,0.06)"
               }}>
-                <div style={{ fontSize: 64, marginBottom: 16 }}>📭</div>
-                <h3 style={{ color: "#1E1B4B", fontWeight: 700, fontSize: 18, margin: "0 0 8px" }}>Belum Ada Pengajuan</h3>
-                <p style={{ color: "#9CA3AF", fontSize: 14 }}>Buat pengajuan barang pertama Anda</p>
-                <button onClick={() => setActiveTab("form")} style={{
-                  marginTop: 20, padding: "12px 28px",
+                <div className="text-5xl sm:text-6xl mb-4">📭</div>
+                <h3 className="text-lg font-bold mb-2" style={{ color: "#1E1B4B" }}>Belum Ada Pengajuan</h3>
+                <p className="text-sm mb-5" style={{ color: "#9CA3AF" }}>Buat pengajuan barang pertama Anda</p>
+                <button onClick={() => setActiveTab("form")} className="px-6 sm:px-8 py-3 rounded-xl text-sm font-semibold" style={{
                   background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
-                  color: "#fff", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: "pointer"
+                  color: "#fff", border: "none", cursor: "pointer"
                 }}>+ Ajukan Barang</button>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div className="flex flex-col gap-3 sm:gap-4">
                 {submissions.map((item, i) => {
                   const sc = getStatusConfig(item.status);
                   const uc = urgencyConfig[item.urgency] || urgencyConfig.standart;
                   return (
-                    <div key={item.id} className="card-hover fade-in" style={{
-                      background: "#fff", borderRadius: 16, padding: "20px 24px",
+                    <div key={item.id} className="card-hover fade-in bg-white rounded-2xl p-4 sm:p-5" style={{
                       boxShadow: "0 2px 12px rgba(0,0,0,0.05)", border: "1px solid #F0EFFE",
                       animationDelay: `${i * 0.04}s`
                     }}>
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-                        <div style={{
-                          width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+                      <div className="flex gap-3 sm:gap-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex-shrink-0" style={{
                           background: "linear-gradient(135deg, #EEF2FF, #F5F3FF)",
-                          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22
+                          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18
                         }}>📦</div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
-                            <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#1E1B4B" }}>{item.title}</h4>
-                            <span style={{
-                              padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700,
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                            <h4 className="text-sm sm:text-base font-bold m-0 truncate" style={{ color: "#1E1B4B" }}>{item.title}</h4>
+                            <span className="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold" style={{
                               background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`
                             }}>● {sc.label}</span>
-                            <span style={{
-                              padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700,
+                            <span className="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold" style={{
                               background: `${uc.color}15`, color: uc.color, border: `1px solid ${uc.color}40`
                             }}>{uc.icon} {uc.label}</span>
                           </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", marginBottom: 6 }}>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1.5 text-[10px] sm:text-xs" style={{ color: "#6B7280" }}>
                             {item.quantity && (
-                              <span style={{ fontSize: 12, color: "#6B7280" }}>📦 {item.quantity} {item.unit}</span>
+                              <span>📦 {item.quantity} {item.unit}</span>
                             )}
                             {item.workshop?.name && (
-                              <span style={{ fontSize: 12, color: "#6B7280" }}>🏭 {item.workshop.name}</span>
+                              <span>🏭 {item.workshop.name}</span>
                             )}
                             {item.division?.name && (
-                              <span style={{ fontSize: 12, color: "#6B7280" }}>🏢 {item.division.name}</span>
+                              <span>🏢 {item.division.name}</span>
                             )}
                             {item.pic && (
-                              <span style={{ fontSize: 12, color: "#6B7280" }}>👤 {item.pic}</span>
+                              <span>👤 {item.pic}</span>
                             )}
-                            <span style={{ fontSize: 12, color: "#9CA3AF" }}>
+                            <span style={{ color: "#9CA3AF" }}>
                               🕐 {new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                             </span>
                           </div>
                           {item.kegunaan && (
-                            <p style={{
-                              margin: 0, fontSize: 13, color: "#6B7280", lineHeight: 1.5,
-                              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 500
+                            <p className="text-xs sm:text-sm m-0 truncate" style={{
+                              color: "#6B7280", lineHeight: 1.5
                             }}>{item.kegunaan}</p>
                           )}
                         </div>
