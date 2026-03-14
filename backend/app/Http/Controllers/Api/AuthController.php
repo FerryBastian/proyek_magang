@@ -14,40 +14,46 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    /**
-     * Register user baru.
-     */
     public function register(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         $user = User::create([
-            'name' => $request->string('name'),
-            'email' => $request->string('email'),
+            'name'     => $request->string('name'),
+            'email'    => $request->string('email'),
             'password' => Hash::make($request->string('password')),
-            'role' => 'user',
+            'role'     => 'user',
         ]);
 
         $token = $user->createToken('register')->plainTextToken;
 
         return response()->json([
             'message' => 'Registered successfully',
-            'token' => $token,
-            'user' => $user,
-            'role' => $user->role,
+            'token'   => $token,
+            'user'    => $user,
+            'role'    => $user->role,
         ], 201);
     }
 
-    /**
-     * Handle login for both SPA (cookie-based) and token-based (Sanctum tokens).
-     */
     public function login(LoginRequest $request)
     {
         $credentials = $request->only(['email', 'password']);
+
+        // Cek apakah user terdaftar tapi sudah di-soft delete
+        $deletedUser = User::withTrashed()
+            ->where('email', $credentials['email'])
+            ->whereNotNull('deleted_at')
+            ->first();
+
+        if ($deletedUser) {
+            return response()->json([
+                'message' => 'Akun kamu telah dinonaktifkan. Hubungi admin untuk informasi lebih lanjut.',
+            ], 403);
+        }
 
         if (!Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
@@ -63,22 +69,19 @@ class AuthController extends Controller
 
             return response()->json([
                 'message' => 'Logged in successfully (token mode)',
-                'token' => $token,
-                'user' => $user,
-                'role' => $user->role,
+                'token'   => $token,
+                'user'    => $user,
+                'role'    => $user->role,
             ], 200);
         }
 
         return response()->json([
             'message' => 'Logged in successfully',
-            'user' => $user,
-            'role' => $user->role,
+            'user'    => $user,
+            'role'    => $user->role,
         ], 200);
     }
 
-    /**
-     * Logout user.
-     */
     public function logout(Request $request)
     {
         $user = $request->user();
@@ -92,17 +95,14 @@ class AuthController extends Controller
         ], 200);
     }
 
-    /**
-     * Google OAuth using ID token from React (Google Identity Services).
-     */
     public function oauthGoogle(Request $request)
     {
         $request->validate([
-            'id_token' => ['required', 'string'],
+            'id_token'    => ['required', 'string'],
             'device_name' => ['sometimes', 'string', 'max:255'],
         ]);
 
-        $idToken = $request->string('id_token')->toString();
+        $idToken  = $request->string('id_token')->toString();
         $clientId = config('services.google.client_id') ?? env('GOOGLE_CLIENT_ID');
 
         $resp = Http::asForm()->get('https://oauth2.googleapis.com/tokeninfo', [
@@ -129,10 +129,10 @@ class AuthController extends Controller
             ]);
         }
 
-        $googleId = $payload['sub'] ?? null;
+        $googleId = $payload['sub']   ?? null;
         $email    = $payload['email'] ?? null;
-        $name     = $payload['name'] ?? ($payload['given_name'] ?? 'Google User');
-        $avatar   = $payload['picture'] ?? null; // ← foto profil Google
+        $name     = $payload['name']  ?? ($payload['given_name'] ?? 'Google User');
+        $avatar   = $payload['picture'] ?? null;
 
         if (!$googleId || !$email) {
             throw ValidationException::withMessages([
@@ -140,6 +140,21 @@ class AuthController extends Controller
             ]);
         }
 
+        // Cek apakah user di-soft delete (by google_id atau email)
+        $deletedUser = User::withTrashed()
+            ->where(function ($q) use ($googleId, $email) {
+                $q->where('google_id', $googleId)->orWhere('email', $email);
+            })
+            ->whereNotNull('deleted_at')
+            ->first();
+
+        if ($deletedUser) {
+            return response()->json([
+                'message' => 'Akun kamu telah dinonaktifkan. Hubungi admin untuk informasi lebih lanjut.',
+            ], 403);
+        }
+
+        // Cari user aktif
         $user = User::where('google_id', $googleId)->first();
         if (!$user) {
             $user = User::where('email', $email)->first();
@@ -149,7 +164,7 @@ class AuthController extends Controller
             $user->forceFill([
                 'google_id' => $googleId,
                 'name'      => $user->name ?: $name,
-                'avatar'    => $avatar, // ← update foto setiap login
+                'avatar'    => $avatar,
             ])->save();
         } else {
             $user = User::create([

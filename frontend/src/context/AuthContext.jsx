@@ -5,9 +5,9 @@ import { authApi } from "../services/api";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser]       = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const navigate              = useNavigate();
 
   useEffect(() => {
     let active = true;
@@ -40,6 +40,7 @@ export function AuthProvider({ children }) {
   };
 
   const loginWithGoogle = async (id_token) => {
+    // Error sengaja tidak di-catch agar bisa ditangkap di Login.jsx
     const res = await authApi.loginWithGoogle({ id_token });
     const { user } = res.data;
     setUser(user);
@@ -53,7 +54,7 @@ export function AuthProvider({ children }) {
       // tetap logout meski request gagal
     } finally {
       setUser(null);
-      navigate("/ ", { replace: true });
+      navigate("/", { replace: true }); // fix: hapus spasi di "/ "
     }
   };
 
