@@ -15,12 +15,64 @@ class AdminController extends Controller
     {
         return response()->json([
             'stats' => [
-                'total_users'       => User::count(),
+                'total_users'       => User::where('role', 'user')->count(),
                 'total_submissions' => Submission::count(),
                 'pending_count'     => Submission::where('status', 'pending')->count(),
                 'approved_count'    => Submission::where('status', 'approved')->count(),
                 'rejected_count'    => Submission::where('status', 'rejected')->count(),
             ],
+        ]);
+    }
+
+    public function users(): JsonResponse
+    {
+        $users = User::withTrashed()->latest()->get(['id', 'name', 'email', 'role', 'avatar', 'created_at', 'deleted_at']);
+        return response()->json($users);
+    }
+
+    public function updateRole(Request $request, User $user): JsonResponse
+    {
+        $request->validate([
+            'role' => 'required|in:user,admin',
+        ]);
+
+        if ($user->id === $request->user()->id) {
+            return response()->json([
+                'message' => 'Tidak dapat mengubah role diri sendiri',
+            ], 403);
+        }
+
+        $user->update(['role' => $request->role]);
+
+        return response()->json([
+            'message' => 'Role berhasil diubah',
+            'data'    => $user,
+        ]);
+    }
+
+    public function deleteUser(Request $request, User $user): JsonResponse
+    {
+        if ($user->id === $request->user()->id) {
+            return response()->json([
+                'message' => 'Tidak dapat menghapus akun sendiri',
+            ], 403);
+        }
+
+        $user->delete();
+
+        return response()->json([
+            'message' => 'User berhasil dihapus',
+        ]);
+    }
+
+    public function restoreUser(int $id): JsonResponse
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->restore();
+
+        return response()->json([
+            'message' => 'User berhasil dipulihkan',
+            'data'    => $user,
         ]);
     }
 
@@ -43,7 +95,6 @@ class AdminController extends Controller
 
         $submission->update(['status' => $request->status]);
 
-        // Kirim event notifikasi ke Socket.io server
         try {
             $response = Http::post('http://localhost:3001/emit-status', [
                 'user_id'       => $submission->user_id,

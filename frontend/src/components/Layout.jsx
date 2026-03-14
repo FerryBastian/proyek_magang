@@ -29,6 +29,7 @@ export default function Layout({ children }) {
         .dtech-nav .nav-active { color: #fff !important; }
         .dtech-logout:hover { color: #FFD0D0 !important; background: rgba(255,100,100,0.15) !important; }
       `}</style>
+
       {/* Navbar */}
       <nav className="dtech-nav border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,7 +50,7 @@ export default function Layout({ children }) {
               {!user && (
                 <Link
                   to="/"
-                  className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+                  className="px-4 py-2 rounded-lg transition-colors font-medium"
                 >
                   Home
                 </Link>
@@ -58,7 +59,7 @@ export default function Layout({ children }) {
               {user?.role === "admin" && (
                 <Link
                   to="/admin"
-                  className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium flex items-center gap-2"
+                  className="px-4 py-2 rounded-lg transition-colors font-medium flex items-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -67,10 +68,22 @@ export default function Layout({ children }) {
                 </Link>
               )}
 
+              {user?.role === "admin" && (
+                <Link
+                  to="/admin/users"
+                  className="px-4 py-2 rounded-lg transition-colors font-medium flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Users
+                </Link>
+              )}
+
               {user?.role === "user" && (
                 <Link
                   to="/user"
-                  className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium flex items-center gap-2"
+                  className="px-4 py-2 rounded-lg transition-colors font-medium flex items-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -100,22 +113,29 @@ export default function Layout({ children }) {
                       <img
                         src={user.avatar}
                         alt={user.name}
+                        referrerPolicy="no-referrer"
                         className="w-8 h-8 rounded-full object-cover"
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.style.display = "none";
-                          e.target.nextSibling.style.display = "flex";
+                          e.target.replaceWith(
+                            Object.assign(document.createElement("div"), {
+                              className: "w-8 h-8 rounded-full flex items-center justify-center",
+                              style: "background:#00B4D8",
+                              innerHTML: `<span style="color:white;font-size:14px;font-weight:600">${(user.name?.charAt(0) || user.email?.charAt(0) || "U").toUpperCase()}</span>`
+                            })
+                          );
                         }}
                       />
-                    ) : null}
-                    <div
-                      className="w-8 h-8 rounded-full items-center justify-center"
-                      style={{ background: "#00B4D8", display: user.avatar ? "none" : "flex" }}
-                    >
-                      <span className="text-white text-sm font-semibold">
-                        {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
+                    ) : (
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        style={{ background: "#00B4D8" }}
+                      >
+                        <span className="text-white text-sm font-semibold">
+                          {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
                     <span className="text-sm font-medium hidden sm:block" style={{ color: "#fff" }}>
                       {user.name || user.email?.split("@")[0]}
                     </span>

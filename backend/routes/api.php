@@ -13,7 +13,7 @@ use App\Models\User;
 Route::prefix('v1')->name('v1.')->group(function () {
 
     // Public endpoints
-    Route::get('/health', fn () => response()->json(['status' => 'ok'], 200))
+    Route::get('/health', fn() => response()->json(['status' => 'ok'], 200))
         ->name('health');
 
     Route::post('/login', [AuthController::class, 'login'])
@@ -59,17 +59,22 @@ Route::prefix('v1')->name('v1.')->group(function () {
                 ->name('admin.dashboard');
 
             // Users list
-            Route::get('/admin/users', function () {
-                return response()->json(
-                    User::where('role', 'user')->latest()->get()
-                );
-            })->name('admin.users.index');
+            Route::get('/admin/users', [AdminController::class, 'users'])
+                ->name('admin.users.index');
+
+            // Update role user
+            Route::patch('/admin/users/{user}/role', [AdminController::class, 'updateRole'])
+                ->name('admin.users.role');
+
+            // Delete & restore user
+            Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+            Route::patch('/admin/users/{id}/restore', [AdminController::class, 'restoreUser'])->name('admin.users.restore');
 
             // Submissions
             Route::get('/admin/submissions', [AdminController::class, 'submissions'])
                 ->name('admin.submissions.index');
 
-            // Status update — pakai AdminController agar bisa emit socket
+            // Status update
             Route::patch('/admin/submissions/{submission}/status', [AdminController::class, 'updateStatus'])
                 ->name('admin.submissions.status');
 
@@ -90,13 +95,13 @@ Route::prefix('v1')->name('v1.')->group(function () {
 
         // USER ROUTES
         Route::middleware('role:user')->group(function () {
-            Route::get('/user/dashboard', fn () => response()->json([
+            Route::get('/user/dashboard', fn() => response()->json([
                 'message' => 'Welcome User',
             ]))->name('user.dashboard');
         });
     });
 
-    Route::fallback(fn () => response()->json([
+    Route::fallback(fn() => response()->json([
         'message' => 'Endpoint not found',
     ], 404))->name('fallback');
 });

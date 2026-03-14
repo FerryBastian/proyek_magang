@@ -7,6 +7,7 @@ import Login from "./pages/login";
 import Register from "./pages/Register";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import UserManagement from "./pages/UserManagement";
 
 function Home() {
   return (
@@ -27,7 +28,7 @@ function Home() {
             />
           </div>
 
-          {/* Wordmark — font default senada "Welcome Back" di Login */}
+          {/* Wordmark */}
           <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", marginBottom: 4, gap: 0 }}>
             <span style={{ fontFamily: "sans-serif", fontSize: 36, fontWeight: 800, color: "#111", letterSpacing: -0.5, textTransform: "uppercase" }}>SUBMIS</span>
             <span style={{ fontFamily: "sans-serif", fontSize: 36, fontWeight: 800, color: "#00B4D8", letterSpacing: -0.5, textTransform: "uppercase" }}>S</span>
@@ -94,7 +95,7 @@ function Home() {
             border: "1px solid rgba(0,180,216,0.4)",
             boxShadow: "0 8px 32px rgba(0,150,199,0.3)",
           }}>
-          <h2 className="text-2xl font-bold mb-2 text-white" style={{letterSpacing: 1.5 }}>
+          <h2 className="text-2xl font-bold mb-2 text-white" style={{ letterSpacing: 1.5 }}>
             Get Started Today
           </h2>
           <div style={{ width: 36, height: 2, background: "#00B4D8", margin: "0 auto 12px" }} />
@@ -104,7 +105,7 @@ function Home() {
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <a href="/login"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5"
-              style={{ background: "#00B4D8", color: "#000", fontFamily: "'Oswald', sans-serif", fontSize: 15, fontWeight: 600, letterSpacing: 1.5, boxShadow: "0 4px 14px rgba(0,180,216,0.35)" }}>
+              style={{ background: "#00B4D8", color: "#ffffff", fontFamily: "'Oswald', sans-serif", fontSize: 15, fontWeight: 600, letterSpacing: 1.5, boxShadow: "0 4px 14px rgba(0,180,216,0.35)" }}>
               <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
               </svg>
@@ -112,7 +113,7 @@ function Home() {
             </a>
             <a href="/register"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5"
-              style={{ background: "transparent", border: "1.5px solid rgba(0,180,216,0.6)", color: "#00B4D8", fontFamily: "'Oswald', sans-serif", fontSize: 15, fontWeight: 600, letterSpacing: 1.5 }}>
+              style={{ background: "transparent", border: "1.5px solid rgba(0,180,216,0.6)", color: "#ffffff", fontFamily: "'Oswald', sans-serif", fontSize: 15, fontWeight: 600, letterSpacing: 1.5 }}>
               <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -138,6 +139,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/user" element={<ProtectedRoute role="user"><UserDashboard /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin/users" element={<ProtectedRoute role="admin"><UserManagement /></ProtectedRoute>} />
             </Routes>
           </Layout>
         </AuthProvider>
