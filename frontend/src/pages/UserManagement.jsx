@@ -1,4 +1,18 @@
 import { useState, useEffect } from "react";
+
+function AlertModal({ show, message, onClose }) {
+  if (!show) return null;
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(15,10,40,0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, animation: "backdropIn 0.2s ease forwards" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, padding: "36px 32px", width: "100%", maxWidth: 400, textAlign: "center", boxShadow: "0 24px 64px rgba(0,119,168,0.2)", border: "1px solid #cce6f0", animation: "modalIn 0.25s ease forwards" }}>
+        <div style={{ width: 68, height: 68, borderRadius: "50%", margin: "0 auto 20px", background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>⚠️</div>
+        <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "#0D3040" }}>Terjadi Kesalahan</h3>
+        <p style={{ margin: "0 0 28px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>{message}</p>
+        <button onClick={onClose} style={{ width: "100%", padding: "13px", background: "linear-gradient(135deg, #0077A8, #0096C7)", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer" }}>OK</button>
+      </div>
+    </div>
+  );
+}
 import API from "../services/api";
 
 export default function UserManagement() {
@@ -8,6 +22,7 @@ export default function UserManagement() {
   const [search, setSearch]         = useState("");
   const [showDeleted, setShowDeleted] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [alertMsg, setAlertMsg]       = useState("");
   const [confirmDelete, setConfirmDelete] = useState(null); // user yang mau dihapus
 
   useEffect(() => {
@@ -38,7 +53,7 @@ export default function UserManagement() {
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
       showSuccess("Role berhasil diubah!");
     } catch (err) {
-      alert(err?.response?.data?.message || "Gagal mengubah role");
+      setAlertMsg(err?.response?.data?.message || "Gagal mengubah role");
     } finally {
       setUpdating(null);
     }
@@ -52,7 +67,7 @@ export default function UserManagement() {
       setUsers(prev => prev.map(u => u.id === user.id ? { ...u, deleted_at: new Date().toISOString() } : u));
       showSuccess(`User "${user.name}" berhasil dihapus`);
     } catch (err) {
-      alert(err?.response?.data?.message || "Gagal menghapus user");
+      setAlertMsg(err?.response?.data?.message || "Gagal menghapus user");
     } finally {
       setUpdating(null);
     }
@@ -65,7 +80,7 @@ export default function UserManagement() {
       setUsers(prev => prev.map(u => u.id === user.id ? { ...u, deleted_at: null } : u));
       showSuccess(`User "${user.name}" berhasil dipulihkan`);
     } catch (err) {
-      alert(err?.response?.data?.message || "Gagal memulihkan user");
+      setAlertMsg(err?.response?.data?.message || "Gagal memulihkan user");
     } finally {
       setUpdating(null);
     }
@@ -92,6 +107,7 @@ export default function UserManagement() {
         * { box-sizing: border-box; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes backdropIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         @keyframes modalIn { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         .fade-in { animation: fadeIn 0.3s ease forwards; }
         .row-hover:hover { background: #F8F7FF !important; }
@@ -344,6 +360,8 @@ export default function UserManagement() {
           </div>
         )}
       </div>
+
+      <AlertModal show={!!alertMsg} message={alertMsg} onClose={() => setAlertMsg("")} />
 
       {/* Modal Konfirmasi Delete */}
       {confirmDelete && (
