@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { submissionsApi, userApi } from "../services/api";
-import API from "../services/api";
-import { useAuth } from "../context/AuthContext";
-import socket from "../services/socket";
+import { submissionsApi, userApi } from "../../services/api";
+import API from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import socket from "../../services/socket";
 
 export default function UserDashboard() {
   const { user } = useAuth();

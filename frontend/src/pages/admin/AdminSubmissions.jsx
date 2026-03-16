@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { adminApi } from "../services/api";
+import { adminApi } from "../../services/api";
 
 const backendUrl = import.meta.env.VITE_BACKEND_APP_URL || "http://localhost:8000";
 

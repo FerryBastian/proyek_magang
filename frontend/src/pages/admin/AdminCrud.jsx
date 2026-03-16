@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API from "../services/api";
+import API from "../../services/api";
 
 function ConfirmModal({ show, title, message, onConfirm, onCancel, confirmLabel = "Ya, Hapus", confirmColor = "linear-gradient(135deg, #EF4444, #DC2626)" }) {
   if (!show) return null;

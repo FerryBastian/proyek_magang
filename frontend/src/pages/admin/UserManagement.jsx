@@ -13,7 +13,7 @@ function AlertModal({ show, message, onClose }) {
     </div>
   );
 }
-import API from "../services/api";
+import API from "../../services/api";
 
 export default function UserManagement() {
   const [users, setUsers]           = useState([]);

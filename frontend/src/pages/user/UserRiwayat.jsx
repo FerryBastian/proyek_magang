@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { submissionsApi } from "../services/api";
-import { useAuth } from "../context/AuthContext";
+import { submissionsApi } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import socket from "../services/socket";
+import socket from "../../services/socket";
 
 export default function UserRiwayat() {
   const { user }    = useAuth();

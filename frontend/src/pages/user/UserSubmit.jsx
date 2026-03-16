@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { submissionsApi, userApi } from "../services/api";
-import API from "../services/api";
-import { useAuth } from "../context/AuthContext";
+import { submissionsApi, userApi } from "../../services/api";
+import API from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function UserSubmit() {

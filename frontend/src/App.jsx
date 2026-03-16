@@ -4,14 +4,14 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 import SidebarLayout from "./components/SidebarLayout";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import Login from "./pages/login";
+import Login from "./pages/Login";
 import Register from "./pages/Register";
-import UserSubmit from "./pages/UserSubmit";
-import UserRiwayat from "./pages/UserRiwayat";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminSubmissions from "./pages/AdminSubmissions";
-import { AdminWorkshops, AdminDivisions } from "./pages/AdminCrud";
-import UserManagement from "./pages/UserManagement";
+import AdminDashboard   from "./pages/admin/AdminDashboard";
+import AdminSubmissions from "./pages/admin/AdminSubmissions";
+import { AdminWorkshops, AdminDivisions } from "./pages/admin/AdminCrud";
+import UserManagement   from "./pages/admin/UserManagement";
+import UserSubmit  from "./pages/user/UserSubmit";
+import UserRiwayat from "./pages/user/UserRiwayat";
 
 function Home() {
   return (
@@ -69,7 +69,7 @@ function AppRoutes() {
       <Route path="/login"               element={<Login />} />
       <Route path="/register"            element={<Register />} />
       <Route path="/user"                element={<ProtectedRoute role="user"><UserSubmit /></ProtectedRoute>} />
-      <Route path="/user/riwayat"         element={<ProtectedRoute role="user"><UserRiwayat /></ProtectedRoute>} />
+      <Route path="/user/riwayat"        element={<ProtectedRoute role="user"><UserRiwayat /></ProtectedRoute>} />
       <Route path="/admin"               element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
       <Route path="/admin/submissions"   element={<ProtectedRoute role="admin"><AdminSubmissions /></ProtectedRoute>} />
       <Route path="/admin/workshops"     element={<ProtectedRoute role="admin"><AdminWorkshops /></ProtectedRoute>} />
