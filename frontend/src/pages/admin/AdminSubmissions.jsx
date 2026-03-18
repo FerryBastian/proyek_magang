@@ -22,8 +22,9 @@ function getStatusBadge(status) {
   const cfg = {
     pending:  { bg: "#FFF8E7", border: "#F59E0B", text: "#B45309", label: "Pending" },
     approved: { bg: "#F0FDF4", border: "#22C55E", text: "#15803D", label: "Approved" },
-    rejected: { bg: "#FFF1F2", border: "#F43F5E", text: "#BE123C", label: "Rejected" },
-    review:   { bg: "#EFF6FF", border: "#3B82F6", text: "#1D4ED8", label: "In Review" },
+    rejected:  { bg: "#FFF1F2", border: "#F43F5E", text: "#BE123C", label: "Rejected" },
+    review:    { bg: "#EFF6FF", border: "#3B82F6", text: "#1D4ED8", label: "In Review" },
+    cancelled: { bg: "#F3F4F6", border: "#9CA3AF", text: "#6B7280", label: "Cancelled" },
   };
   const c = cfg[status?.toLowerCase()] || cfg.pending;
   return (
@@ -79,7 +80,14 @@ export default function AdminSubmissions() {
 
   const filtered = data
     .filter(item => statusFilter === "all" || item.status?.toLowerCase() === statusFilter)
-    .filter(item => !search || item.title?.toLowerCase().includes(search.toLowerCase()) || item.user?.name?.toLowerCase().includes(search.toLowerCase()));
+    .filter(item => !search || item.title?.toLowerCase().includes(search.toLowerCase()) || item.user?.name?.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      const aIsCancelled = a.status?.toLowerCase() === "cancelled";
+      const bIsCancelled = b.status?.toLowerCase() === "cancelled";
+      if (aIsCancelled && !bIsCancelled) return 1;
+      if (!aIsCancelled && bIsCancelled) return -1;
+      return 0;
+    });
 
   return (
     <div style={{ fontFamily: "'Barlow', sans-serif" }}>
@@ -149,7 +157,11 @@ export default function AdminSubmissions() {
               <div style={{ background: "#EBF6FA", borderRadius: 12, padding: 16, border: "1px solid #cce6f0" }}>
                 <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 600, color: "#0077A8" }}>Update Status</p>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {["pending", "review", "approved", "rejected"].map(s => (
+                  {selectedItem.status === "cancelled" ? (
+                    <div style={{ padding: "12px 16px", background: "#F3F4F6", borderRadius: 10, fontSize: 13, color: "#9CA3AF", textAlign: "center" }}>
+                      🚫 Pengajuan ini dibatalkan oleh pengguna 
+                    </div>
+                  ) : ["pending", "review", "approved", "rejected"].map(s => (
                     <button key={s} onClick={() => handleStatusChange(selectedItem.id, s)}
                       disabled={updatingId === selectedItem.id || selectedItem.status === s}
                       style={{ padding: "8px 16px", borderRadius: 8, fontSize: 12, fontWeight: 600, border: selectedItem.status === s ? "none" : "1px solid #cce6f0", background: selectedItem.status === s ? "#0096C7" : "#fff", color: selectedItem.status === s ? "#fff" : "#0D3040", cursor: selectedItem.status === s ? "default" : "pointer", opacity: updatingId === selectedItem.id ? 0.5 : 1, textTransform: "capitalize" }}>
@@ -178,6 +190,7 @@ export default function AdminSubmissions() {
             <option value="review">In Review</option>
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
+            <option value="cancelled">Cancelled</option>
           </select>
           <span style={{ padding: "8px 14px", borderRadius: 20, fontSize: 12, fontWeight: 600, background: "#EBF6FA", color: "#0077A8" }}>{filtered.length} pengajuan</span>
         </div>
@@ -226,7 +239,8 @@ export default function AdminSubmissions() {
                         </svg>
                       ) : (
                         <select value={item.status} onChange={e => handleStatusChange(item.id, e.target.value)}
-                          style={{ padding: "6px 10px", border: "1.5px solid #cce6f0", borderRadius: 8, fontSize: 12, color: "#0D3040", background: "#f5fbfd", cursor: "pointer", fontFamily: "'Barlow', sans-serif", outline: "none" }}>
+                          disabled={item.status === "cancelled"}
+                          style={{ padding: "6px 10px", border: "1.5px solid #cce6f0", borderRadius: 8, fontSize: 12, color: "#0D3040", background: item.status === "cancelled" ? "#F3F4F6" : "#f5fbfd", cursor: item.status === "cancelled" ? "not-allowed" : "pointer", fontFamily: "'Barlow', sans-serif", outline: "none", opacity: item.status === "cancelled" ? 0.6 : 1 }}>
                           <option value="pending">Pending</option>
                           <option value="review">In Review</option>
                           <option value="approved">Approved</option>

@@ -35,23 +35,22 @@ class SubmissionController extends Controller
 
         $submission = DB::transaction(function () use ($user, $request) {
             $data = [
-                'user_id'      => $user->id,
-                'workshop_id'  => $request->input('workshop_id'),
-                'division_id'  => $request->input('division_id'),
-                'title'        => $request->string('title'),
-                'quantity'     => $request->integer('quantity'),
-                'unit'         => $request->string('unit') ?: 'pcs',
-                'spesifikasi'  => $request->string('spesifikasi') ?: null,
-                'kegunaan'     => $request->string('kegunaan'),
-                'content'      => $request->string('content') ?: null,
-                'urgency'      => $request->string('urgency') ?: 'standart',
-                'pic'          => $request->string('pic'),
-                'nomor_telepon'=> $request->string('nomor_telepon') ?: null,
+                'user_id'        => $user->id,
+                'workshop_id'    => $request->input('workshop_id'),
+                'division_id'    => $request->input('division_id'),
+                'title'          => $request->string('title'),
+                'quantity'       => $request->integer('quantity'),
+                'unit'           => $request->string('unit') ?: 'pcs',
+                'spesifikasi'    => $request->string('spesifikasi') ?: null,
+                'kegunaan'       => $request->string('kegunaan'),
+                'content'        => $request->string('content') ?: null,
+                'urgency'        => $request->string('urgency') ?: 'standart',
+                'pic'            => $request->string('pic'),
+                'nomor_telepon'  => $request->string('nomor_telepon') ?: null,
                 'referensi_link' => $request->string('referensi_link') ?: null,
-                'status'       => 'pending',
+                'status'         => 'pending',
             ];
 
-            // Handle file upload
             if ($request->hasFile('referensi_gambar')) {
                 $path = $request->file('referensi_gambar')->store('referensi', 'public');
                 $data['referensi_gambar'] = $path;
@@ -77,6 +76,30 @@ class SubmissionController extends Controller
                 ->latest()
                 ->get()
         );
+    }
+
+    public function cancel(Request $request, Submission $submission): JsonResponse
+    {
+        // Pastikan submission milik user yang login
+        if ($submission->user_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Tidak diizinkan membatalkan pengajuan ini',
+            ], 403);
+        }
+
+        // Hanya bisa cancel kalau masih pending
+        if ($submission->status !== 'pending') {
+            return response()->json([
+                'message' => 'Pengajuan hanya bisa dibatalkan saat masih berstatus pending',
+            ], 422);
+        }
+
+        $submission->update(['status' => 'cancelled', 'cancelled_by' => 'user']);
+
+        return response()->json([
+            'message' => 'Pengajuan berhasil dibatalkan',
+            'data'    => $submission,
+        ]);
     }
 
     private function sendWhatsAppNotification(Submission $submission, $user): void
@@ -122,9 +145,6 @@ class SubmissionController extends Controller
             'message'   => $message,
         ];
 
-        Log::info('Gowa payload:', $payload);
-        Log::info('Gowa credentials:', ['username' => $username, 'password' => $password ? '***' : 'NULL']);
-
         try {
             $response = Http::timeout(10)
                 ->withBasicAuth($username, $password)
@@ -133,10 +153,7 @@ class SubmissionController extends Controller
             if ($response->ok()) {
                 Log::info('Gowa WA berhasil terkirim');
             } else {
-                Log::warning('Gowa WA gagal', [
-                    'status' => $response->status(),
-                    'body'   => $response->body(),
-                ]);
+                Log::warning('Gowa WA gagal', ['status' => $response->status(), 'body' => $response->body()]);
             }
         } catch (\Exception $e) {
             Log::warning('Gowa WA exception: ' . $e->getMessage());

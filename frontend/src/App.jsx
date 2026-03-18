@@ -4,7 +4,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 import SidebarLayout from "./components/SidebarLayout";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import Login from "./pages/Login";
+import Login from "./pages/login";
 import Register from "./pages/Register";
 import AdminDashboard   from "./pages/admin/AdminDashboard";
 import AdminSubmissions from "./pages/admin/AdminSubmissions";
@@ -14,7 +14,7 @@ import UserSubmit  from "./pages/user/UserSubmit";
 import UserRiwayat from "./pages/user/UserRiwayat";
 
 function Home() {
-  return (
+  return (  
     <div className="min-h-[80vh] flex items-center justify-center" style={{ background: "#EBF6FA" }}>
       <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
       <div className="text-center max-w-2xl mx-auto px-4">

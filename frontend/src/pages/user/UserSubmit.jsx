@@ -225,7 +225,7 @@ export default function UserSubmit() {
 
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={labelStyle}>Keterangan Tambahan</label>
-              <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Informasi tambahan..." rows={3} style={{ ...inputStyle(content), resize: "none", lineHeight: 1.6 }}
+              <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Apabila tersedia di toko offline terdekat, sertakan nama dan alamat toko" rows={3} style={{ ...inputStyle(content), resize: "none", lineHeight: 1.6 }}
                 onFocus={e => e.target.style.border = "2px solid #0096C7"} onBlur={e => e.target.style.border = content ? "2px solid #0096C7" : "2px solid #cce6f0"} />
             </div>
 

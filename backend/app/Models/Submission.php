@@ -25,6 +25,7 @@ class Submission extends Model
         'referensi_link',
         'referensi_gambar',
         'status',
+        'cancelled_by',
     ];
 
     protected $casts = [

@@ -12,71 +12,42 @@ use App\Models\User;
 
 Route::prefix('v1')->name('v1.')->group(function () {
 
-    // Public endpoints
-    Route::get('/health', fn() => response()->json(['status' => 'ok'], 200))
-        ->name('health');
+    Route::get('/health', fn() => response()->json(['status' => 'ok'], 200))->name('health');
 
-    Route::post('/login', [AuthController::class, 'login'])
-        ->middleware('throttle:5,1')
-        ->name('auth.login');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1')->name('auth.login');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1')->name('auth.register');
+    Route::post('/oauth/google', [AuthController::class, 'oauthGoogle'])->middleware('throttle:10,1')->name('auth.google');
 
-    Route::post('/register', [AuthController::class, 'register'])
-        ->middleware('throttle:5,1')
-        ->name('auth.register');
-
-    Route::post('/oauth/google', [AuthController::class, 'oauthGoogle'])
-        ->middleware('throttle:10,1')
-        ->name('auth.google');
-
-    // Public dropdown — untuk form submission user
     Route::get('/workshops', [WorkshopController::class, 'index'])->name('workshops.index');
     Route::get('/divisions', [DivisionController::class, 'index'])->name('divisions.index');
 
-    // Protected endpoints
     Route::middleware('auth:sanctum')->group(function () {
 
-        Route::post('/logout', [AuthController::class, 'logout'])
-            ->name('auth.logout');
+        Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
         Route::get('/me', function (Request $request) {
-            return response()->json([
-                'user' => $request->user(),
-            ]);
+            return response()->json(['user' => $request->user()]);
         })->name('auth.me');
 
         // Submissions
-        Route::post('/submit', [SubmissionController::class, 'store'])
-            ->name('submissions.store');
-
-        Route::get('/my-submissions', [SubmissionController::class, 'mySubmissions'])
-            ->name('submissions.mine');
+        Route::post('/submit', [SubmissionController::class, 'store'])->name('submissions.store');
+        Route::get('/my-submissions', [SubmissionController::class, 'mySubmissions'])->name('submissions.mine');
+        Route::patch('/submissions/{submission}/cancel', [SubmissionController::class, 'cancel'])->name('submissions.cancel');
 
         // ADMIN ROUTES
         Route::middleware('role:admin')->group(function () {
 
-            // Dashboard
-            Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
-                ->name('admin.dashboard');
+            Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
-            // Users list
-            Route::get('/admin/users', [AdminController::class, 'users'])
-                ->name('admin.users.index');
-
-            // Update role user
-            Route::patch('/admin/users/{user}/role', [AdminController::class, 'updateRole'])
-                ->name('admin.users.role');
-
-            // Delete & restore user
+            // Users
+            Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users.index');
+            Route::patch('/admin/users/{user}/role', [AdminController::class, 'updateRole'])->name('admin.users.role');
             Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
             Route::patch('/admin/users/{id}/restore', [AdminController::class, 'restoreUser'])->name('admin.users.restore');
 
             // Submissions
-            Route::get('/admin/submissions', [AdminController::class, 'submissions'])
-                ->name('admin.submissions.index');
-
-            // Status update
-            Route::patch('/admin/submissions/{submission}/status', [AdminController::class, 'updateStatus'])
-                ->name('admin.submissions.status');
+            Route::get('/admin/submissions', [AdminController::class, 'submissions'])->name('admin.submissions.index');
+            Route::patch('/admin/submissions/{submission}/status', [AdminController::class, 'updateStatus'])->name('admin.submissions.status');
 
             // Workshop CRUD
             Route::get('/admin/workshops', [WorkshopController::class, 'adminIndex'])->name('admin.workshops.index');
@@ -93,15 +64,10 @@ Route::prefix('v1')->name('v1.')->group(function () {
             Route::patch('/admin/divisions/{id}/restore', [DivisionController::class, 'restore'])->name('admin.divisions.restore');
         });
 
-        // USER ROUTES
         Route::middleware('role:user')->group(function () {
-            Route::get('/user/dashboard', fn() => response()->json([
-                'message' => 'Welcome User',
-            ]))->name('user.dashboard');
+            Route::get('/user/dashboard', fn() => response()->json(['message' => 'Welcome User']))->name('user.dashboard');
         });
     });
 
-    Route::fallback(fn() => response()->json([
-        'message' => 'Endpoint not found',
-    ], 404))->name('fallback');
+    Route::fallback(fn() => response()->json(['message' => 'Endpoint not found'], 404))->name('fallback');
 });
