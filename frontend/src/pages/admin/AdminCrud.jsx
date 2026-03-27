@@ -11,17 +11,17 @@ function ConfirmModal({ show, title, message, onConfirm, onCancel, confirmLabel 
       animation: "backdropIn 0.2s ease forwards",
     }}>
       <div onClick={e => e.stopPropagation()} style={{
-        background: "#fff", borderRadius: 20, padding: "36px 32px",
+        background: "#fff", borderRadius: 20, padding: "32px 24px",
         width: "100%", maxWidth: 400, textAlign: "center",
         boxShadow: "0 24px 64px rgba(0,119,168,0.2)", border: "1px solid #cce6f0",
         animation: "modalIn 0.25s ease forwards",
       }}>
-        <div style={{ width: 68, height: 68, borderRadius: "50%", margin: "0 auto 20px", background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>🗑️</div>
-        <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "#0D3040" }}>{title}</h3>
-        <p style={{ margin: "0 0 28px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>{message}</p>
+        <div style={{ width: 64, height: 64, borderRadius: "50%", margin: "0 auto 16px", background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>🗑️</div>
+        <h3 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 700, color: "#0D3040" }}>{title}</h3>
+        <p style={{ margin: "0 0 24px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>{message}</p>
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onCancel} style={{ flex: 1, padding: "13px", background: "#f5fbfd", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, fontWeight: 600, color: "#6B7280", cursor: "pointer" }}>Batal</button>
-          <button onClick={onConfirm} style={{ flex: 1, padding: "13px", background: confirmColor, border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer", boxShadow: "0 4px 14px rgba(239,68,68,0.35)" }}>{confirmLabel}</button>
+          <button onClick={onCancel} style={{ flex: 1, padding: "12px", background: "#f5fbfd", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, fontWeight: 600, color: "#6B7280", cursor: "pointer" }}>Batal</button>
+          <button onClick={onConfirm} style={{ flex: 1, padding: "12px", background: confirmColor, border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer", boxShadow: "0 4px 14px rgba(239,68,68,0.35)" }}>{confirmLabel}</button>
         </div>
       </div>
     </div>
@@ -38,15 +38,15 @@ function AlertModal({ show, message, onClose }) {
       animation: "backdropIn 0.2s ease forwards",
     }}>
       <div onClick={e => e.stopPropagation()} style={{
-        background: "#fff", borderRadius: 20, padding: "36px 32px",
+        background: "#fff", borderRadius: 20, padding: "32px 24px",
         width: "100%", maxWidth: 400, textAlign: "center",
         boxShadow: "0 24px 64px rgba(0,119,168,0.2)", border: "1px solid #cce6f0",
         animation: "modalIn 0.25s ease forwards",
       }}>
-        <div style={{ width: 68, height: 68, borderRadius: "50%", margin: "0 auto 20px", background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>⚠️</div>
-        <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "#0D3040" }}>Terjadi Kesalahan</h3>
-        <p style={{ margin: "0 0 28px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>{message}</p>
-        <button onClick={onClose} style={{ width: "100%", padding: "13px", background: "linear-gradient(135deg, #0077A8, #0096C7)", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer" }}>OK</button>
+        <div style={{ width: 64, height: 64, borderRadius: "50%", margin: "0 auto 16px", background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>⚠️</div>
+        <h3 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 700, color: "#0D3040" }}>Terjadi Kesalahan</h3>
+        <p style={{ margin: "0 0 24px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>{message}</p>
+        <button onClick={onClose} style={{ width: "100%", padding: "12px", background: "linear-gradient(135deg, #0077A8, #0096C7)", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer" }}>OK</button>
       </div>
     </div>
   );
@@ -55,12 +55,13 @@ function AlertModal({ show, message, onClose }) {
 function CrudForm({ title, form, setForm, onSubmit, editing, onCancelEdit, loading: formLoading }) {
   const inputStyle = { width: "100%", padding: "10px 14px", border: "1.5px solid #cce6f0", borderRadius: 10, fontSize: 13, color: "#0D3040", background: "#f5fbfd", fontFamily: "'Barlow', sans-serif", outline: "none" };
   return (
-    <div style={{ background: "#fff", borderRadius: 16, padding: "20px 24px", marginBottom: 20, border: "1px solid #cce6f0", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+    <div style={{ background: "#fff", borderRadius: 16, padding: "20px", marginBottom: 20, border: "1px solid #cce6f0", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
       <h4 style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#0D3040" }}>
         {editing ? `✏️ Edit ${title}` : `➕ Tambah ${title} Baru`}
       </h4>
       <form onSubmit={onSubmit}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+        {/* Responsive grid: 2 kolom di desktop, 1 kolom di mobile */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 14 }}>
           <div>
             <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#0D3040", marginBottom: 6 }}>Nama <span style={{ color: "#EF4444" }}>*</span></label>
             <input type="text" value={form.name} required onChange={e => setForm({ ...form, name: e.target.value })} placeholder={`Nama ${title}...`} style={inputStyle}
@@ -76,12 +77,12 @@ function CrudForm({ title, form, setForm, onSubmit, editing, onCancelEdit, loadi
           <input type="checkbox" id={`active-${title}`} checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} style={{ width: 16, height: 16, accentColor: "#0096C7", cursor: "pointer" }} />
           <label htmlFor={`active-${title}`} style={{ fontSize: 13, fontWeight: 500, color: "#0D3040", cursor: "pointer" }}>Aktif</label>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button type="submit" disabled={formLoading} style={{ padding: "10px 24px", background: "linear-gradient(135deg, #0077A8, #0096C7)", color: "#fff", border: "none", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer", opacity: formLoading ? 0.6 : 1, boxShadow: "0 4px 12px rgba(0,150,199,0.3)" }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <button type="submit" disabled={formLoading} style={{ flex: 1, minWidth: 100, padding: "10px 20px", background: "linear-gradient(135deg, #0077A8, #0096C7)", color: "#fff", border: "none", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer", opacity: formLoading ? 0.6 : 1, boxShadow: "0 4px 12px rgba(0,150,199,0.3)" }}>
             {formLoading ? "Menyimpan..." : editing ? "Update" : "Simpan"}
           </button>
           {editing && (
-            <button type="button" onClick={onCancelEdit} style={{ padding: "10px 24px", background: "#f5fbfd", color: "#0D3040", border: "1.5px solid #cce6f0", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Batal</button>
+            <button type="button" onClick={onCancelEdit} style={{ flex: 1, minWidth: 100, padding: "10px 20px", background: "#f5fbfd", color: "#0D3040", border: "1.5px solid #cce6f0", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Batal</button>
           )}
         </div>
       </form>
@@ -95,46 +96,76 @@ function CrudTable({ items, onEdit, onDelete, onRestore }) {
       {items.length === 0 ? (
         <div style={{ padding: 60, textAlign: "center", color: "#9CA3AF" }}>Belum ada data</div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ background: "#EBF6FA" }}>
-                {["Nama", "Deskripsi", "Status", "Aksi"].map(h => (
-                  <th key={h} style={{ padding: "12px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "#0077A8", textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.map(item => (
-                <tr key={item.id} style={{ borderTop: "1px solid #e8f4fa", opacity: item.deleted_at ? 0.6 : 1, transition: "background 0.15s" }}
-                  onMouseEnter={e => e.currentTarget.style.background = "#f5fbfd"}
-                  onMouseLeave={e => e.currentTarget.style.background = ""}>
-                  <td style={{ padding: "12px 16px", fontSize: 13, fontWeight: 600, color: "#0D3040" }}>{item.name}</td>
-                  <td style={{ padding: "12px 16px", fontSize: 13, color: "#6B7280" }}>{item.description || "-"}</td>
-                  <td style={{ padding: "12px 16px" }}>
-                    {item.deleted_at
-                      ? <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#FFF1F2", color: "#BE123C" }}>Dihapus</span>
-                      : item.is_active
-                        ? <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#F0FDF4", color: "#15803D" }}>Aktif</span>
-                        : <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#F3F4F6", color: "#6B7280" }}>Nonaktif</span>}
-                  </td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      {item.deleted_at ? (
-                        <button onClick={() => onRestore(item.id)} style={{ padding: "6px 14px", fontSize: 12, fontWeight: 600, background: "#F0FDF4", color: "#15803D", border: "1px solid #BBF7D0", borderRadius: 8, cursor: "pointer" }}>♻️ Pulihkan</button>
-                      ) : (
-                        <>
-                          <button onClick={() => onEdit(item)} style={{ padding: "6px 14px", fontSize: 12, fontWeight: 600, background: "#e0f3fa", color: "#0077A8", border: "1px solid #bde8f5", borderRadius: 8, cursor: "pointer" }}>✏️ Edit</button>
-                          <button onClick={() => onDelete(item.id)} style={{ padding: "6px 14px", fontSize: 12, fontWeight: 600, background: "#FFF1F2", color: "#BE123C", border: "1px solid #FECACA", borderRadius: 8, cursor: "pointer" }}>🗑️ Hapus</button>
-                        </>
-                      )}
-                    </div>
-                  </td>
+        <>
+          {/* Desktop Table */}
+          <div className="crud-desktop-table" style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "#EBF6FA" }}>
+                  {["Nama", "Deskripsi", "Status", "Aksi"].map(h => (
+                    <th key={h} style={{ padding: "12px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "#0077A8", textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {items.map(item => (
+                  <tr key={item.id} style={{ borderTop: "1px solid #e8f4fa", opacity: item.deleted_at ? 0.6 : 1, transition: "background 0.15s" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "#f5fbfd"}
+                    onMouseLeave={e => e.currentTarget.style.background = ""}>
+                    <td style={{ padding: "12px 16px", fontSize: 13, fontWeight: 600, color: "#0D3040" }}>{item.name}</td>
+                    <td style={{ padding: "12px 16px", fontSize: 13, color: "#6B7280" }}>{item.description || "-"}</td>
+                    <td style={{ padding: "12px 16px" }}>
+                      {item.deleted_at
+                        ? <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#FFF1F2", color: "#BE123C" }}>Dihapus</span>
+                        : item.is_active
+                          ? <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#F0FDF4", color: "#15803D" }}>Aktif</span>
+                          : <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#F3F4F6", color: "#6B7280" }}>Nonaktif</span>}
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        {item.deleted_at ? (
+                          <button onClick={() => onRestore(item.id)} style={{ padding: "6px 14px", fontSize: 12, fontWeight: 600, background: "#F0FDF4", color: "#15803D", border: "1px solid #BBF7D0", borderRadius: 8, cursor: "pointer" }}>♻️ Pulihkan</button>
+                        ) : (
+                          <>
+                            <button onClick={() => onEdit(item)} style={{ padding: "6px 14px", fontSize: 12, fontWeight: 600, background: "#e0f3fa", color: "#0077A8", border: "1px solid #bde8f5", borderRadius: 8, cursor: "pointer" }}>✏️ Edit</button>
+                            <button onClick={() => onDelete(item.id)} style={{ padding: "6px 14px", fontSize: 12, fontWeight: 600, background: "#FFF1F2", color: "#BE123C", border: "1px solid #FECACA", borderRadius: 8, cursor: "pointer" }}>🗑️ Hapus</button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="crud-mobile-cards" style={{ display: "none", padding: "12px", gap: 10, flexDirection: "column" }}>
+            {items.map(item => (
+              <div key={item.id} style={{ background: "#f5fbfd", borderRadius: 12, padding: "14px 16px", border: "1px solid #e0f0f8", opacity: item.deleted_at ? 0.6 : 1 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "#0D3040" }}>{item.name}</span>
+                  {item.deleted_at
+                    ? <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#FFF1F2", color: "#BE123C" }}>Dihapus</span>
+                    : item.is_active
+                      ? <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#F0FDF4", color: "#15803D" }}>Aktif</span>
+                      : <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#F3F4F6", color: "#6B7280" }}>Nonaktif</span>}
+                </div>
+                {item.description && <p style={{ margin: "0 0 10px", fontSize: 12, color: "#6B7280" }}>{item.description}</p>}
+                <div style={{ display: "flex", gap: 8 }}>
+                  {item.deleted_at ? (
+                    <button onClick={() => onRestore(item.id)} style={{ flex: 1, padding: "8px", fontSize: 12, fontWeight: 600, background: "#F0FDF4", color: "#15803D", border: "1px solid #BBF7D0", borderRadius: 8, cursor: "pointer" }}>♻️ Pulihkan</button>
+                  ) : (
+                    <>
+                      <button onClick={() => onEdit(item)} style={{ flex: 1, padding: "8px", fontSize: 12, fontWeight: 600, background: "#e0f3fa", color: "#0077A8", border: "1px solid #bde8f5", borderRadius: 8, cursor: "pointer" }}>✏️ Edit</button>
+                      <button onClick={() => onDelete(item.id)} style={{ flex: 1, padding: "8px", fontSize: 12, fontWeight: 600, background: "#FFF1F2", color: "#BE123C", border: "1px solid #FECACA", borderRadius: 8, cursor: "pointer" }}>🗑️ Hapus</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
@@ -145,7 +176,7 @@ function useCrud(apiBase) {
   const [form, setForm]         = useState({ name: "", description: "", is_active: true });
   const [editing, setEditing]   = useState(null);
   const [loading, setLoading]   = useState(false);
-  const [confirm, setConfirm]   = useState(null); // { id }
+  const [confirm, setConfirm]   = useState(null);
   const [alertMsg, setAlertMsg] = useState("");
 
   useEffect(() => { fetchData(); }, []);
@@ -178,11 +209,20 @@ function useCrud(apiBase) {
   return { items, form, setForm, editing, loading, confirm, setConfirm, alertMsg, setAlertMsg, handleSubmit, handleDelete, handleRestore, startEdit, cancelEdit };
 }
 
+const crudStyles = `
+  @keyframes backdropIn{from{opacity:0}to{opacity:1}}
+  @keyframes modalIn{from{opacity:0;transform:scale(0.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  @media(max-width:640px){
+    .crud-desktop-table{display:none!important;}
+    .crud-mobile-cards{display:flex!important;}
+  }
+`;
+
 export function AdminWorkshops() {
   const crud = useCrud("/admin/workshops");
   return (
     <div style={{ fontFamily: "'Barlow', sans-serif" }}>
-      <style>{`@keyframes backdropIn{from{opacity:0}to{opacity:1}}@keyframes modalIn{from{opacity:0;transform:scale(0.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}`}</style>
+      <style>{crudStyles}</style>
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: "#0D3040" }}>🏭 Workshop</h2>
         <p style={{ margin: 0, fontSize: 13, color: "#9CA3AF" }}>Kelola daftar workshop</p>
@@ -201,7 +241,7 @@ export function AdminDivisions() {
   const crud = useCrud("/admin/divisions");
   return (
     <div style={{ fontFamily: "'Barlow', sans-serif" }}>
-      <style>{`@keyframes backdropIn{from{opacity:0}to{opacity:1}}@keyframes modalIn{from{opacity:0;transform:scale(0.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}`}</style>
+      <style>{crudStyles}</style>
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: "#0D3040" }}>🏢 Divisi</h2>
         <p style={{ margin: 0, fontSize: 13, color: "#9CA3AF" }}>Kelola daftar divisi</p>

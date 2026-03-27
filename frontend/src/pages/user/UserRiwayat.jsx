@@ -6,16 +6,17 @@ import { useNavigate } from "react-router-dom";
 import socket from "../../services/socket";
 
 export default function UserRiwayat() {
-  const { user }    = useAuth();
-  const navigate    = useNavigate();
-  const [submissions, setSubmissions]   = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [successMsg, setSuccessMsg]     = useState("");
-  const [openHistory, setOpenHistory]   = useState(null);
-  const [search, setSearch]             = useState("");
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const [submissions, setSubmissions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [openHistory, setOpenHistory] = useState(null);
+  const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [confirmCancel, setConfirmCancel] = useState(null); // submission yang mau dicancel
-  const [cancelling, setCancelling]     = useState(null);
+  const [confirmCancel, setConfirmCancel] = useState(null);
+  const [cancelling, setCancelling] = useState(null);
 
   useEffect(() => {
     submissionsApi.mySubmissions()
@@ -93,18 +94,9 @@ export default function UserRiwayat() {
   const renderStatusHistory = (item) => {
     const history = item.status_history || [];
     const fallback = [{ status: "pending", note: "Pengajuan dikirim", created_at: item.created_at }];
-    if (["review","approved","rejected"].includes(item.status?.toLowerCase()))
-      fallback.push({ status: "review", note: "Sedang ditinjau oleh admin", created_at: null });
-    if (["approved","rejected"].includes(item.status?.toLowerCase()))
-      fallback.push({ status: item.status, note: item.status === "approved" ? "Pengajuan disetujui" : "Pengajuan ditolak", admin_note: item.admin_note || null, created_at: item.updated_at });
-    if (item.status?.toLowerCase() === "cancelled")
-      fallback.push({
-        status: "cancelled",
-        note: item.cancelled_by === "admin"
-          ? "Pengajuan dibatalkan oleh admin"
-          : "Pengajuan dibatalkan oleh kamu",
-        created_at: item.updated_at,
-      });
+    if (["review","approved","rejected"].includes(item.status?.toLowerCase())) fallback.push({ status: "review", note: "Sedang ditinjau oleh admin", created_at: null });
+    if (["approved","rejected"].includes(item.status?.toLowerCase())) fallback.push({ status: item.status, note: item.status === "approved" ? "Pengajuan disetujui" : "Pengajuan ditolak", admin_note: item.admin_note || null, created_at: item.updated_at });
+    if (item.status?.toLowerCase() === "cancelled") fallback.push({ status: "cancelled", note: item.cancelled_by === "admin" ? "Pengajuan dibatalkan oleh admin" : "Pengajuan dibatalkan oleh kamu", created_at: item.updated_at });
     const display = history.length > 0 ? history : fallback;
 
     return (
@@ -122,16 +114,8 @@ export default function UserRiwayat() {
               <div style={{ paddingBottom: isLast ? 4 : 16, flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: sc.text }}>{sc.label}</div>
                 {h.note && <div style={{ fontSize: 12, color: "#7ab3c4", marginTop: 2 }}>{h.note}</div>}
-                {h.admin_note && (
-                  <div style={{ marginTop: 8, padding: "8px 12px", background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 8, fontSize: 12, color: sc.text }}>
-                    💬 Catatan admin: "{h.admin_note}"
-                  </div>
-                )}
-                {h.created_at && (
-                  <div style={{ fontSize: 11, color: "#a0c4d4", marginTop: 3 }}>
-                    🕐 {new Date(h.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                  </div>
-                )}
+                {h.admin_note && <div style={{ marginTop: 8, padding: "8px 12px", background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 8, fontSize: 12, color: sc.text }}>💬 Catatan admin: "{h.admin_note}"</div>}
+                {h.created_at && <div style={{ fontSize: 11, color: "#a0c4d4", marginTop: 3 }}>🕐 {new Date(h.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</div>}
               </div>
             </div>
           );
@@ -143,12 +127,25 @@ export default function UserRiwayat() {
   return (
     <div style={{ fontFamily: "'Barlow', sans-serif" }}>
       <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      <style>{`*{box-sizing:border-box}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn 0.3s ease forwards}.card-hover{transition:transform 0.2s ease,box-shadow 0.2s ease}.card-hover:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,150,199,0.12)!important}.history-btn{transition:all 0.2s}.history-btn:hover{background:#d4eef8!important}@keyframes backdropIn{from{opacity:0}to{opacity:1}}@keyframes modalIn{from{opacity:0;transform:scale(0.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}.lm-backdrop{animation:backdropIn 0.2s ease forwards}.lm-modal{animation:modalIn 0.25s ease forwards}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#0096C7;border-radius:4px}`}</style>
+      <style>{`
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        .fade-in{animation:fadeIn 0.3s ease forwards}
+        .card-hover{transition: all 0.2s ease;}
+        .card-hover:hover{transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,150,199,0.15)!important;}
+
+        .desktop-list { display: block; }
+        .mobile-list { display: none; }
+
+        @media (max-width: 768px) {
+          .desktop-list { display: none !important; }
+          .mobile-list { display: flex !important; flex-direction: column; gap: 16px; }
+        }
+      `}</style>
 
       {/* Header */}
-      <div className="fade-in" style={{ marginBottom: 24 }}>
-        <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: "#0D3040" }}>📋 Riwayat Pengajuan</h2>
-        <p style={{ margin: 0, fontSize: 13, color: "#7ab3c4" }}>Pantau status semua pengajuan kamu</p>
+      <div className="fade-in header-section" style={{ marginBottom: 28 }}>
+        <h2 style={{ margin: "0 0 4px", fontSize: 24, fontWeight: 700, color: "#0D3040" }}>📋 Riwayat Pengajuan</h2>
+        <p style={{ margin: 0, fontSize: 14, color: "#7ab3c4" }}>Pantau status semua pengajuan kamu</p>
       </div>
 
       {/* Success Message */}
@@ -158,142 +155,198 @@ export default function UserRiwayat() {
           border: `1px solid ${successMsg.startsWith("✅") || successMsg.startsWith("🔔") ? "#BBF7D0" : "#FECACA"}`,
           borderRadius: 12, padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 10,
         }}>
-          <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: successMsg.startsWith("✅") || successMsg.startsWith("🔔") ? "#15803D" : "#BE123C", flex: 1 }}>{successMsg}</p>
-          <button onClick={() => setSuccessMsg("")} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: "#9CA3AF" }}>×</button>
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: successMsg.startsWith("✅") || successMsg.startsWith("🔔") ? "#15803D" : "#BE123C" }}>{successMsg}</p>
+          <button onClick={() => setSuccessMsg("")} style={{ marginLeft: "auto", background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#9CA3AF" }}>×</button>
         </div>
       )}
 
       {/* Stats + Search + Button */}
-      <div className="fade-in" style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
+      <div className="fade-in" style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 28, alignItems: "center" }}>
         {[
-          { label: "Total",      value: stats.total,     color: "#0096C7", bg: "#e0f3fa", filter: "all" },
-          { label: "Menunggu",   value: stats.pending,   color: "#F59E0B", bg: "#FFF8E7", filter: "pending" },
-          { label: "Disetujui",  value: stats.approved,  color: "#22C55E", bg: "#F0FDF4", filter: "approved" },
-          { label: "Ditolak",    value: stats.rejected,  color: "#EF4444", bg: "#FFF1F2", filter: "rejected" },
+          { label: "Total", value: stats.total, color: "#0096C7", bg: "#e0f3fa", filter: "all" },
+          { label: "Menunggu", value: stats.pending, color: "#F59E0B", bg: "#FFF8E7", filter: "pending" },
+          { label: "Disetujui", value: stats.approved, color: "#22C55E", bg: "#F0FDF4", filter: "approved" },
+          { label: "Ditolak", value: stats.rejected, color: "#EF4444", bg: "#FFF1F2", filter: "rejected" },
           { label: "Dibatalkan", value: stats.cancelled, color: "#9CA3AF", bg: "#F3F4F6", filter: "cancelled" },
         ].map(s => (
           <div key={s.label} onClick={() => setFilterStatus(filterStatus === s.filter ? "all" : s.filter)} style={{
             background: filterStatus === s.filter ? s.bg : "#fff",
-            borderRadius: 14, padding: "12px 18px",
+            borderRadius: 14, padding: "14px 20px", minWidth: 95,
             border: `1.5px solid ${filterStatus === s.filter ? s.color : "#cce6f0"}`,
-            cursor: "pointer", transition: "all 0.2s", minWidth: 90,
+            cursor: "pointer", transition: "all 0.2s",
           }}>
-            <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: 11, color: "#6B7280", fontWeight: 500 }}>{s.label}</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: 12, color: "#6B7280" }}>{s.label}</div>
           </div>
         ))}
-        <div style={{ flex: 1, minWidth: 200, position: "relative" }}>
-          <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }}>🔍</span>
-          <input type="text" placeholder="Cari nama barang..." value={search} onChange={e => setSearch(e.target.value)}
-            style={{ width: "100%", height: "100%", padding: "12px 12px 12px 36px", border: "1.5px solid #cce6f0", borderRadius: 14, fontSize: 13, color: "#0D3040", background: "#fff", fontFamily: "'Barlow', sans-serif", outline: "none" }} />
+
+        <div style={{ flex: 1, minWidth: 260, position: "relative" }}>
+          <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", fontSize: 18, color: "#9CA3AF" }}>🔍</span>
+          <input 
+            type="text" 
+            placeholder="Cari nama barang..." 
+            value={search} 
+            onChange={e => setSearch(e.target.value)}
+            style={{ 
+              width: "100%", 
+              padding: "13px 16px 13px 50px", 
+              border: "1.5px solid #cce6f0", 
+              borderRadius: 14, 
+              fontSize: 14, 
+              background: "#fff" 
+            }} 
+          />
         </div>
-        <button onClick={() => navigate("/user")} style={{
-          padding: "12px 20px", borderRadius: 14, fontSize: 13, fontWeight: 700,
-          background: "linear-gradient(135deg, #0077A8, #0096C7)", color: "#fff",
-          border: "none", cursor: "pointer", whiteSpace: "nowrap",
-          boxShadow: "0 4px 12px rgba(0,150,199,0.3)",
-        }}>+ Ajukan Barang</button>
+
+        <button 
+          onClick={() => navigate("/user")} 
+          style={{
+            padding: "13px 26px",
+            borderRadius: 14,
+            fontSize: 14.5,
+            fontWeight: 700,
+            background: "linear-gradient(135deg, #0077A8, #0096C7)", 
+            color: "#fff",
+            border: "none", 
+            cursor: "pointer",
+            boxShadow: "0 4px 14px rgba(0,150,199,0.25)",
+          }}
+        >
+          + Ajukan Barang
+        </button>
       </div>
 
-      {/* List */}
       {loading ? (
-        <div style={{ textAlign: "center", padding: 60, color: "#7ab3c4" }}>Memuat data...</div>
+        <div style={{ textAlign: "center", padding: 80, color: "#7ab3c4" }}>Memuat data...</div>
       ) : filtered.length === 0 ? (
-        <div style={{ background: "#fff", borderRadius: 20, padding: "60px 32px", textAlign: "center", boxShadow: "0 4px 24px rgba(0,150,199,0.08)" }}>
-          <div style={{ fontSize: 64, marginBottom: 16 }}>📭</div>
-          <h3 style={{ color: "#0D3040", fontWeight: 700, margin: "0 0 8px" }}>Belum Ada Pengajuan</h3>
-          <p style={{ color: "#7ab3c4", fontSize: 14, margin: "0 0 20px" }}>Kamu belum punya pengajuan {filterStatus !== "all" ? `dengan status "${filterStatus}"` : ""}</p>
-          <button onClick={() => navigate("/user")} style={{ padding: "12px 28px", background: "linear-gradient(135deg, #0077A8, #0096C7)", color: "#fff", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>+ Ajukan Barang</button>
+        <div style={{ background: "#fff", borderRadius: 20, padding: 80, textAlign: "center", boxShadow: "0 4px 24px rgba(0,150,199,0.08)" }}>
+          <div style={{ fontSize: 80, marginBottom: 16 }}>📭</div>
+          <h3 style={{ color: "#0D3040" }}>Belum Ada Pengajuan</h3>
+          <p style={{ color: "#7ab3c4", margin: "16px 0 24px" }}>Kamu belum punya pengajuan {filterStatus !== "all" ? `dengan status "${filterStatus}"` : ""}</p>
+          <button onClick={() => navigate("/user")} style={{ padding: "14px 32px", background: "linear-gradient(135deg, #0077A8, #0096C7)", color: "#fff", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 700 }}>+ Ajukan Barang Baru</button>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {filtered.map((item, i) => {
-            const sc = getStatusConfig(item.status);
-            const uc = urgencyConfig[item.urgency] || urgencyConfig.standart;
-            const isOpen = openHistory === item.id;
-            const isPending = item.status?.toLowerCase() === "pending";
-            const isCancelling = cancelling === item.id;
+        <>
+          {/* DESKTOP VIEW */}
+          <div className="desktop-list">
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {filtered.map((item, i) => {
+                const sc = getStatusConfig(item.status);
+                const uc = urgencyConfig[item.urgency] || urgencyConfig.standart;
+                const isOpen = openHistory === item.id;
+                const isPending = item.status?.toLowerCase() === "pending";
 
-            return (
-              <div key={item.id} className="card-hover fade-in" style={{
-                background: "#fff", borderRadius: 16, padding: "20px 24px",
-                boxShadow: "0 2px 12px rgba(0,150,199,0.07)", border: "1px solid #d4eef8",
-                animationDelay: `${i * 0.04}s`,
-                opacity: item.status?.toLowerCase() === "cancelled" ? 0.7 : 1,
-              }}>
-                <div style={{ display: "flex", gap: 14 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, background: sc.bg, border: `1.5px solid ${sc.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{sc.icon}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                      <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#0D3040" }}>{item.title}</h4>
-                      <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: sc.bg, color: sc.text, border: `1px solid ${sc.border}` }}>● {sc.label}</span>
-                      <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: `${uc.color}15`, color: uc.color, border: `1px solid ${uc.color}40` }}>{uc.icon} {uc.label}</span>
+                return (
+                  <div key={item.id} className="card-hover fade-in" style={{ 
+                    background: "#fff", borderRadius: 18, padding: "22px 26px", 
+                    boxShadow: "0 4px 20px rgba(0,150,199,0.08)", border: "1px solid #d4eef8"
+                  }}>
+                    <div style={{ display: "flex", gap: 18 }}>
+                      <div style={{ width: 52, height: 52, borderRadius: 14, flexShrink: 0, background: sc.bg, border: `2px solid ${sc.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>{sc.icon}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                          <h4 style={{ margin: 0, fontSize: 16.5, fontWeight: 700, color: "#0D3040" }}>{item.title}</h4>
+                          <span style={{ padding: "4px 14px", borderRadius: 9999, fontSize: 12.5, fontWeight: 700, background: sc.bg, color: sc.text }}>{sc.label}</span>
+                          <span style={{ padding: "4px 14px", borderRadius: 9999, fontSize: 12.5, fontWeight: 700, background: `${uc.color}15`, color: uc.color }}>{uc.icon} {uc.label}</span>
+                        </div>
+
+                        <div style={{ marginTop: 8, fontSize: 13.5, color: "#6B7280" }}>
+                          {item.quantity} {item.unit} • {item.workshop?.name || "-"} • {new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+                        </div>
+
+                        <div style={{ marginTop: 14, display: "flex", gap: 10 }}>
+                          <button 
+                            onClick={() => setOpenHistory(isOpen ? null : item.id)} 
+                            style={{ padding: "8px 18px", fontSize: 13.5, fontWeight: 600, background: "#EBF6FA", border: "1px solid #a0d4e8", borderRadius: 10 }}
+                          >
+                            {isOpen ? "Sembunyikan Riwayat" : "Lihat Riwayat"}
+                          </button>
+
+                          {isPending && (
+                            <button 
+                              onClick={() => setConfirmCancel(item)} 
+                              disabled={cancelling === item.id}
+                              style={{ padding: "8px 18px", fontSize: 13.5, fontWeight: 600, background: "#FFF1F2", color: "#EF4444", border: "1px solid #FECACA", borderRadius: 10 }}
+                            >
+                              Batalkan
+                            </button>
+                          )}
+                        </div>
+
+                        {isOpen && renderStatusHistory(item)}
+                      </div>
                     </div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 16px", fontSize: 12, color: "#7ab3c4", marginBottom: 6 }}>
-                      {item.quantity && <span>📦 {item.quantity} {item.unit}</span>}
-                      {item.workshop?.name && <span>🏭 {item.workshop.name}</span>}
-                      {item.division?.name && <span>🏢 {item.division.name}</span>}
-                      {item.pic && <span>👤 {item.pic}</span>}
-                      <span>🕐 {new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* MOBILE VIEW - Sekarang pasti kelihatan */}
+          <div className="mobile-list">
+            {filtered.map(item => {
+              const sc = getStatusConfig(item.status);
+              const uc = urgencyConfig[item.urgency] || urgencyConfig.standart;
+              const isOpen = openHistory === item.id;
+              const isPending = item.status?.toLowerCase() === "pending";
+
+              return (
+                <div key={item.id} className="card-hover fade-in" style={{ 
+                  background: "#fff", borderRadius: 16, padding: "18px", 
+                  boxShadow: "0 4px 16px rgba(0,150,199,0.08)", border: "1px solid #d4eef8"
+                }}>
+                  <div style={{ display: "flex", gap: 14 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: sc.bg, border: `1.5px solid ${sc.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
+                      {sc.icon}
                     </div>
-                    {item.kegunaan && <p style={{ margin: 0, fontSize: 13, color: "#7ab3c4", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.kegunaan}</p>}
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 700, color: "#0D3040" }}>{item.title}</h4>
+                      <div style={{ fontSize: 13, color: "#6B7280", marginTop: 4 }}>
+                        {item.quantity} {item.unit} • {new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+                      </div>
+                      <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                        <span style={{ padding: "3px 10px", borderRadius: 9999, fontSize: 11.5, background: sc.bg, color: sc.text }}>{sc.label}</span>
+                        <span style={{ padding: "3px 10px", borderRadius: 9999, fontSize: 11.5, background: `${uc.color}15`, color: uc.color }}>{uc.icon} {uc.label}</span>
+                      </div>
 
-                    {/* Action buttons */}
-                    <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-                      <button className="history-btn" onClick={() => setOpenHistory(isOpen ? null : item.id)} style={{
-                        padding: "5px 12px", fontSize: 12, fontWeight: 600,
-                        color: "#0096C7", background: "#EBF6FA", border: "1px solid #a0d4e8",
-                        borderRadius: 8, cursor: "pointer", fontFamily: "'Barlow', sans-serif",
-                      }}>{isOpen ? "Sembunyikan ▴" : "Lihat riwayat ▾"}</button>
+                      <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
+                        <button 
+                          onClick={() => setOpenHistory(isOpen ? null : item.id)} 
+                          style={{ flex: 1, padding: "9px", fontSize: 13.5, fontWeight: 600, background: "#EBF6FA", border: "1px solid #a0d4e8", borderRadius: 10 }}
+                        >
+                          {isOpen ? "Tutup Riwayat" : "Lihat Riwayat"}
+                        </button>
+                        {isPending && (
+                          <button 
+                            onClick={() => setConfirmCancel(item)} 
+                            style={{ padding: "9px 18px", fontSize: 13.5, fontWeight: 600, background: "#FFF1F2", color: "#EF4444", border: "1px solid #FECACA", borderRadius: 10 }}
+                          >
+                            Batalkan
+                          </button>
+                        )}
+                      </div>
 
-                      {isPending && (
-                        <button onClick={() => setConfirmCancel(item)} disabled={isCancelling} style={{
-                          padding: "5px 12px", fontSize: 12, fontWeight: 600,
-                          color: "#EF4444", background: "#FFF1F2", border: "1px solid #FECACA",
-                          borderRadius: 8, cursor: "pointer", fontFamily: "'Barlow', sans-serif",
-                          opacity: isCancelling ? 0.5 : 1,
-                        }}>🚫 Batalkan</button>
-                      )}
+                      {isOpen && renderStatusHistory(item)}
                     </div>
                   </div>
                 </div>
-                {isOpen && renderStatusHistory(item)}
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </>
       )}
 
       {/* Modal Konfirmasi Cancel */}
       {confirmCancel && (
-        <div className="lm-backdrop" onClick={() => setConfirmCancel(null)} style={{
-          position: "fixed", inset: 0, zIndex: 1000,
-          background: "rgba(15,10,40,0.45)", backdropFilter: "blur(4px)",
-          display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
-        }}>
-          <div className="lm-modal" onClick={e => e.stopPropagation()} style={{
-            background: "#fff", borderRadius: 20, padding: "36px 32px",
-            width: "100%", maxWidth: 400, textAlign: "center",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.15)", border: "1px solid #FECACA",
-          }}>
+        <div className="lm-backdrop" onClick={() => setConfirmCancel(null)} style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(15,10,40,0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div className="lm-modal" onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, padding: "36px 32px", width: "100%", maxWidth: 400, textAlign: "center", boxShadow: "0 24px 64px rgba(0,0,0,0.15)", border: "1px solid #FECACA" }}>
             <div style={{ width: 68, height: 68, borderRadius: "50%", margin: "0 auto 20px", background: "#FFF1F2", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>🚫</div>
             <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "#0D3040" }}>Batalkan Pengajuan?</h3>
             <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 600, color: "#4B5563" }}>{confirmCancel.title}</p>
-            <p style={{ margin: "0 0 28px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>
-              Pengajuan yang dibatalkan tidak bisa diaktifkan kembali.
-            </p>
+            <p style={{ margin: "0 0 28px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>Pengajuan yang dibatalkan tidak bisa diaktifkan kembali.</p>
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setConfirmCancel(null)} style={{
-                flex: 1, padding: "13px", background: "#f5fbfd",
-                border: "2px solid #cce6f0", borderRadius: 12,
-                fontSize: 14, fontWeight: 600, color: "#6B7280", cursor: "pointer",
-              }}>Kembali</button>
-              <button onClick={handleCancel} style={{
-                flex: 1, padding: "13px",
-                background: "linear-gradient(135deg, #EF4444, #DC2626)",
-                border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700,
-                color: "#fff", cursor: "pointer", boxShadow: "0 4px 14px rgba(239,68,68,0.35)",
-              }}>Ya, Batalkan</button>
+              <button onClick={() => setConfirmCancel(null)} style={{ flex: 1, padding: "13px", background: "#f5fbfd", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, fontWeight: 600, color: "#6B7280" }}>Kembali</button>
+              <button onClick={handleCancel} style={{ flex: 1, padding: "13px", background: "linear-gradient(135deg, #EF4444, #DC2626)", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff" }}>Ya, Batalkan</button>
             </div>
           </div>
         </div>

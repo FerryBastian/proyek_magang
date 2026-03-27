@@ -49,10 +49,99 @@ export default function AdminDashboard() {
 
   return (
     <div style={{ fontFamily: "'Barlow', sans-serif" }}>
-      <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn 0.3s ease forwards}`}</style>
+      <style>{`
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        .fade-in{animation:fadeIn 0.3s ease forwards}
+        
+        @media (max-width: 768px) {
+          .header-section {
+            flex-direction: column !important;
+            text-align: center;
+            padding: 24px 20px !important;
+          }
+          .header-section .header-icon {
+            margin-top: 20px;
+            width: 68px;
+            height: 68px;
+            font-size: 30px;
+          }
+          
+          .chart-container {
+            padding: 20px 16px !important;
+          }
+          .chart-container h3 {
+            font-size: 15px !important;
+            margin-bottom: 14px !important;
+          }
+          
+          /* Stat cards & quick links tetap horizontal scroll (rapi & mudah swipe) */
+          .mobile-scroll {
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            scroll-snap-type: x mandatory !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: none !important;
+            gap: 16px !important;
+            padding: 0 16px 12px 16px !important; /* padding samping biar rapi & nyaman di jari */
+          }
+          .mobile-scroll::-webkit-scrollbar {
+            display: none !important;
+          }
+          .mobile-scroll .stat-card {
+            min-width: 152px !important;
+            flex-shrink: 0 !important;
+            scroll-snap-align: start !important;
+            padding: 18px 16px !important;
+          }
+          .mobile-scroll .quick-link-item {
+            min-width: 190px !important;
+            flex-shrink: 0 !important;
+            scroll-snap-align: start !important;
+          }
+          
+          /* CHARTS DI MOBILE: STACK VERTIKAL (full width) → jauh lebih rapi & mudah dilihat */
+          .charts-scroll {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 24px !important;
+          }
+          .charts-scroll .chart-container {
+            min-width: 100% !important;
+            flex-shrink: 0 !important;
+          }
+          .charts-scroll .chart-container .recharts-responsive-container {
+            min-height: 240px !important; /* sedikit lebih tinggi agar chart terlihat jelas di HP */
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .mobile-scroll .stat-card {
+            min-width: 138px !important;
+            padding: 16px 14px !important;
+          }
+          .mobile-scroll .stat-card .stat-value {
+            font-size: 26px !important;
+          }
+          .mobile-scroll .stat-card .stat-label {
+            font-size: 10px !important;
+          }
+          
+          .charts-scroll .chart-container .recharts-responsive-container {
+            min-height: 220px !important;
+          }
+          
+          .chart-container {
+            padding: 18px 14px !important;
+          }
+          .chart-container h3 {
+            font-size: 14px !important;
+          }
+        }
+      `}</style>
 
       {/* Header */}
-      <div className="fade-in" style={{
+      <div className="fade-in header-section" style={{
         background: "linear-gradient(135deg, #0077A8, #0096C7, #00B4D8)",
         borderRadius: 20, padding: "28px 32px", marginBottom: 24,
         boxShadow: "0 16px 48px rgba(0,150,199,0.3)",
@@ -65,7 +154,7 @@ export default function AdminDashboard() {
             {new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </p>
         </div>
-        <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>📊</div>
+        <div className="header-icon" style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>📊</div>
       </div>
 
       {loading ? (
@@ -73,9 +162,9 @@ export default function AdminDashboard() {
       ) : (
         <>
           {/* Stat Cards */}
-          <div className="fade-in" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14, marginBottom: 24 }}>
+          <div className="fade-in stat-cards mobile-scroll" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14, marginBottom: 24 }}>
             {statCards.map(card => (
-              <div key={card.label} onClick={() => navigate(card.path)} style={{
+              <div key={card.label} className="stat-card" onClick={() => navigate(card.path)} style={{
                 background: "#fff", borderRadius: 16, padding: "18px 20px",
                 border: "1px solid #cce6f0", boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
                 cursor: "pointer", transition: "all 0.2s",
@@ -84,18 +173,18 @@ export default function AdminDashboard() {
                 onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.04)"; e.currentTarget.style.borderColor = "#cce6f0"; }}
               >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                  <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5 }}>{card.label}</p>
+                  <p className="stat-label" style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5 }}>{card.label}</p>
                   <div style={{ width: 32, height: 32, borderRadius: 10, background: card.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{card.icon}</div>
                 </div>
-                <p style={{ margin: 0, fontSize: 30, fontWeight: 800, color: card.color }}>{card.value ?? 0}</p>
+                <p className="stat-value" style={{ margin: 0, fontSize: 30, fontWeight: 800, color: card.color }}>{card.value ?? 0}</p>
               </div>
             ))}
           </div>
 
-          {/* Charts Row */}
-          <div className="fade-in" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20, marginBottom: 20 }}>
+          {/* Charts Row - Desktop tetap 2:1, Mobile sekarang VERTIKAL full-width */}
+          <div className="fade-in charts-row charts-scroll" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20, marginBottom: 20 }}>
             {/* Line Chart */}
-            <div style={{ background: "#fff", padding: 24, borderRadius: 16, border: "1px solid #cce6f0", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+            <div className="chart-container" style={{ background: "#fff", padding: 24, borderRadius: 16, border: "1px solid #cce6f0", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#0D3040" }}>📈 Trend Pengajuan 7 Hari Terakhir</h3>
               <ResponsiveContainer width="100%" height={240}>
                 <LineChart data={trend}>
@@ -109,7 +198,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Pie Chart */}
-            <div style={{ background: "#fff", padding: 24, borderRadius: 16, border: "1px solid #cce6f0", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+            <div className="chart-container" style={{ background: "#fff", padding: 24, borderRadius: 16, border: "1px solid #cce6f0", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#0D3040" }}>🥧 Status Pengajuan</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
@@ -142,9 +231,9 @@ export default function AdminDashboard() {
           {/* Quick Links */}
           <div className="fade-in">
             <h3 style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 700, color: "#0D3040" }}>⚡ Menu Cepat</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 }}>
+            <div className="quick-links mobile-scroll" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 }}>
               {quickLinks.map(link => (
-                <div key={link.path} onClick={() => navigate(link.path)} style={{
+                <div className="quick-link-item" key={link.path} onClick={() => navigate(link.path)} style={{
                   background: "#fff", borderRadius: 14, padding: "16px 20px",
                   border: "1px solid #cce6f0", boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
                   cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 14,
