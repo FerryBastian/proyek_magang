@@ -1,56 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../../services/api";
-
-function ConfirmModal({ show, title, message, onConfirm, onCancel, confirmLabel = "Ya, Hapus", confirmColor = "linear-gradient(135deg, #EF4444, #DC2626)" }) {
-  if (!show) return null;
-  return (
-    <div onClick={onCancel} style={{
-      position: "fixed", inset: 0, zIndex: 1000,
-      background: "rgba(15,10,40,0.45)", backdropFilter: "blur(4px)",
-      display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
-      animation: "backdropIn 0.2s ease forwards",
-    }}>
-      <div onClick={e => e.stopPropagation()} style={{
-        background: "#fff", borderRadius: 20, padding: "32px 24px",
-        width: "100%", maxWidth: 400, textAlign: "center",
-        boxShadow: "0 24px 64px rgba(0,119,168,0.2)", border: "1px solid #cce6f0",
-        animation: "modalIn 0.25s ease forwards",
-      }}>
-        <div style={{ width: 64, height: 64, borderRadius: "50%", margin: "0 auto 16px", background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>🗑️</div>
-        <h3 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 700, color: "#0D3040" }}>{title}</h3>
-        <p style={{ margin: "0 0 24px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>{message}</p>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onCancel} style={{ flex: 1, padding: "12px", background: "#f5fbfd", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, fontWeight: 600, color: "#6B7280", cursor: "pointer" }}>Batal</button>
-          <button onClick={onConfirm} style={{ flex: 1, padding: "12px", background: confirmColor, border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer", boxShadow: "0 4px 14px rgba(239,68,68,0.35)" }}>{confirmLabel}</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AlertModal({ show, message, onClose }) {
-  if (!show) return null;
-  return (
-    <div onClick={onClose} style={{
-      position: "fixed", inset: 0, zIndex: 1000,
-      background: "rgba(15,10,40,0.45)", backdropFilter: "blur(4px)",
-      display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
-      animation: "backdropIn 0.2s ease forwards",
-    }}>
-      <div onClick={e => e.stopPropagation()} style={{
-        background: "#fff", borderRadius: 20, padding: "32px 24px",
-        width: "100%", maxWidth: 400, textAlign: "center",
-        boxShadow: "0 24px 64px rgba(0,119,168,0.2)", border: "1px solid #cce6f0",
-        animation: "modalIn 0.25s ease forwards",
-      }}>
-        <div style={{ width: 64, height: 64, borderRadius: "50%", margin: "0 auto 16px", background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>⚠️</div>
-        <h3 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 700, color: "#0D3040" }}>Terjadi Kesalahan</h3>
-        <p style={{ margin: "0 0 24px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>{message}</p>
-        <button onClick={onClose} style={{ width: "100%", padding: "12px", background: "linear-gradient(135deg, #0077A8, #0096C7)", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer" }}>OK</button>
-      </div>
-    </div>
-  );
-}
+import { ConfirmModal, AlertModal } from "../../components/Modals";
 
 function CrudForm({ title, form, setForm, onSubmit, editing, onCancelEdit, loading: formLoading }) {
   const inputStyle = { width: "100%", padding: "10px 14px", border: "1.5px solid #cce6f0", borderRadius: 10, fontSize: 13, color: "#0D3040", background: "#f5fbfd", fontFamily: "'Barlow', sans-serif", outline: "none" };

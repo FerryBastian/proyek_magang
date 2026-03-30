@@ -4,6 +4,7 @@ import API from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import socket from "../../services/socket";
+import { ConfirmModal, SuccessBanner } from "../../components/Modals";
 
 export default function UserRiwayat() {
   const { user } = useAuth();
@@ -126,7 +127,6 @@ export default function UserRiwayat() {
 
   return (
     <div style={{ fontFamily: "'Barlow', sans-serif" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
       <style>{`
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         .fade-in{animation:fadeIn 0.3s ease forwards}
@@ -149,16 +149,7 @@ export default function UserRiwayat() {
       </div>
 
       {/* Success Message */}
-      {successMsg && (
-        <div className="fade-in" style={{
-          background: successMsg.startsWith("✅") || successMsg.startsWith("🔔") ? "#F0FDF4" : "#FFF1F2",
-          border: `1px solid ${successMsg.startsWith("✅") || successMsg.startsWith("🔔") ? "#BBF7D0" : "#FECACA"}`,
-          borderRadius: 12, padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 10,
-        }}>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: successMsg.startsWith("✅") || successMsg.startsWith("🔔") ? "#15803D" : "#BE123C" }}>{successMsg}</p>
-          <button onClick={() => setSuccessMsg("")} style={{ marginLeft: "auto", background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#9CA3AF" }}>×</button>
-        </div>
-      )}
+      <SuccessBanner message={successMsg} onClose={() => setSuccessMsg("")} />
 
       {/* Stats + Search + Button */}
       <div className="fade-in" style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 28, alignItems: "center" }}>
@@ -336,21 +327,14 @@ export default function UserRiwayat() {
         </>
       )}
 
-      {/* Modal Konfirmasi Cancel */}
-      {confirmCancel && (
-        <div className="lm-backdrop" onClick={() => setConfirmCancel(null)} style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(15,10,40,0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <div className="lm-modal" onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, padding: "36px 32px", width: "100%", maxWidth: 400, textAlign: "center", boxShadow: "0 24px 64px rgba(0,0,0,0.15)", border: "1px solid #FECACA" }}>
-            <div style={{ width: 68, height: 68, borderRadius: "50%", margin: "0 auto 20px", background: "#FFF1F2", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>🚫</div>
-            <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "#0D3040" }}>Batalkan Pengajuan?</h3>
-            <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 600, color: "#4B5563" }}>{confirmCancel.title}</p>
-            <p style={{ margin: "0 0 28px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>Pengajuan yang dibatalkan tidak bisa diaktifkan kembali.</p>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setConfirmCancel(null)} style={{ flex: 1, padding: "13px", background: "#f5fbfd", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, fontWeight: 600, color: "#6B7280" }}>Kembali</button>
-              <button onClick={handleCancel} style={{ flex: 1, padding: "13px", background: "linear-gradient(135deg, #EF4444, #DC2626)", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff" }}>Ya, Batalkan</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        show={!!confirmCancel}
+        title="Batalkan Pengajuan?"
+        message={`Pengajuan yang dibatalkan tidak bisa diaktifkan kembali.`}
+        onConfirm={handleCancel}
+        onCancel={() => setConfirmCancel(null)}
+        confirmLabel="Ya, Batalkan"
+      />
     </div>
   );
 }

@@ -1,22 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { adminApi } from "../../services/api";
-
-const backendUrl = import.meta.env.VITE_BACKEND_APP_URL || "http://localhost:8000";
-
-function AlertModal({ show, message, onClose }) {
-  if (!show) return null;
-  return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(15,10,40,0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, animation: "backdropIn 0.2s ease forwards" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, padding: "36px 32px", width: "100%", maxWidth: 400, textAlign: "center", boxShadow: "0 24px 64px rgba(0,119,168,0.2)", border: "1px solid #cce6f0", animation: "modalIn 0.25s ease forwards" }}>
-        <div style={{ width: 68, height: 68, borderRadius: "50%", margin: "0 auto 20px", background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>⚠️</div>
-        <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "#0D3040" }}>Terjadi Kesalahan</h3>
-        <p style={{ margin: "0 0 28px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>{message}</p>
-        <button onClick={onClose} style={{ width: "100%", padding: "13px", background: "linear-gradient(135deg, #0077A8, #0096C7)", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer" }}>OK</button>
-      </div>
-    </div>
-  );
-}
+import { AlertModal } from "../../components/Modals";
 
 function getStatusBadge(status) {
   const cfg = {

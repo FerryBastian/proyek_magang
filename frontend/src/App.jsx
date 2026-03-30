@@ -16,7 +16,6 @@ import UserRiwayat from "./pages/user/UserRiwayat";
 function Home() {
   return (  
     <div className="min-h-[80vh] flex items-center justify-center" style={{ background: "#EBF6FA" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
       <div className="text-center max-w-2xl mx-auto px-4">
         <div className="mb-8">
           <div className="flex justify-center mb-5">

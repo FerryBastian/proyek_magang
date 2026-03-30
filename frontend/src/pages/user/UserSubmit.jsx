@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { submissionsApi, userApi } from "../../services/api";
+import { userApi } from "../../services/api";
 import API from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { SuccessBanner } from "../../components/Modals";
 
 export default function UserSubmit() {
   const { user } = useAuth();
@@ -94,7 +95,6 @@ export default function UserSubmit() {
 
   return (
     <div style={{ fontFamily: "'Barlow', sans-serif" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
       <style>{`
         * { box-sizing: border-box; }
         input, textarea, select { font-family: 'Barlow', sans-serif !important; }
@@ -174,17 +174,7 @@ export default function UserSubmit() {
       )}
 
       {/* Success Message */}
-      {successMsg && (
-        <div style={{
-          background: successMsg.startsWith("✅") ? "#F0FDF4" : "#FFF1F2",
-          border: `1px solid ${successMsg.startsWith("✅") ? "#BBF7D0" : "#FECACA"}`,
-          borderRadius: 12, padding: "14px 18px", marginBottom: 24,
-          display: "flex", alignItems: "center", gap: 10,
-        }}>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: successMsg.startsWith("✅") ? "#15803D" : "#BE123C" }}>{successMsg}</p>
-          <button onClick={() => setSuccessMsg("")} style={{ marginLeft: "auto", background: "none", border: "none", fontSize: 20, color: "#9CA3AF" }}>×</button>
-        </div>
-      )}
+      <SuccessBanner message={successMsg} onClose={() => setSuccessMsg("")} />
 
       {/* Form Card */}
       <div className="fade-in form-card" style={{ background: "#fff", borderRadius: 20, padding: "28px 32px", boxShadow: "0 4px 24px rgba(0,150,199,0.08)", border: "1px solid #d4eef8" }}>

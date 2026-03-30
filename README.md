@@ -1,70 +1,85 @@
-# 📦 Submission App
+<div align="center">
 
-Aplikasi pengajuan barang berbasis web dengan notifikasi WhatsApp otomatis dan update status realtime. Dibangun menggunakan **Laravel** (backend), **React + Vite** (frontend), **Go WhatsApp Web Multidevice** (WA gateway), dan **Socket.io** (realtime).
+<img src="frontend/public/dtech.png" alt="Dtech Logo" width="80" />
 
----
+# Submission App
 
-## ✨ Fitur
+**A web-based procurement request system with real-time notifications and WhatsApp integration.**
 
-- 🔐 **Autentikasi** — Login manual (email/password) dan Login dengan Google OAuth
-- 📝 **Registrasi User** — User baru dapat mendaftar secara mandiri
-- 📦 **Pengajuan Barang** — User dapat mengajukan barang dengan detail lengkap:
-  - Nama barang, jumlah & satuan
-  - Workshop & Divisi (dropdown)
-  - Spesifikasi, kegunaan, keterangan tambahan
-  - Tingkat urgensi (Standart / Urgent / Emergency)
-  - PIC & nomor telepon
-  - Referensi link & upload gambar/PDF referensi
-- 📊 **Riwayat Pengajuan** — User dapat melihat status semua pengajuan miliknya
-- 🔔 **Notifikasi Realtime** — Status pengajuan berubah otomatis di browser user tanpa refresh via Socket.io
-- 📱 **Notifikasi WhatsApp Otomatis** — Setiap pengajuan masuk, admin langsung mendapat notifikasi WA lengkap via Gowa (self-hosted)
-- 🛡️ **Role-based Access** — Role `user` dan `admin` dengan akses berbeda
-- 🛠️ **Admin Dashboard** — Admin dapat:
-  - Melihat semua pengajuan dengan detail lengkap (modal popup)
-  - Mengubah status pengajuan (pending → review → approved / rejected)
-  - CRUD Workshop — tambah, edit, hapus (soft delete), pulihkan
-  - CRUD Divisi — tambah, edit, hapus (soft delete), pulihkan
+Built with Laravel, React, Socket.io, and Go WhatsApp Web Multidevice.
+
+[![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=flat&logo=laravel&logoColor=white)](https://laravel.com)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=black)](https://reactjs.org)
+[![Socket.io](https://img.shields.io/badge/Socket.io-4-010101?style=flat&logo=socket.io)](https://socket.io)
+[![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?style=flat&logo=mysql&logoColor=white)](https://mysql.com)
+
+</div>
 
 ---
 
-## 🗂️ Struktur Folder
+## ✨ Features
+
+- 🔐 **Authentication** — Email/password login and Google OAuth
+- 📝 **User Registration** — Self-registration for new users
+- 📦 **Procurement Requests** — Submit detailed item requests including:
+  - Item name, quantity & unit
+  - Workshop & Division (dropdown)
+  - Specifications, usage, and additional notes
+  - Urgency level (Standard / Urgent / Emergency)
+  - PIC & phone number
+  - Reference link & image/PDF upload
+- 📊 **Request History** — Users can track all their submission statuses
+- 🚫 **Cancel Request** — Users can cancel pending submissions
+- 🔔 **Real-time Notifications** — Status updates reflected instantly via Socket.io
+- 📱 **WhatsApp Notifications** — Admins receive detailed WA notifications on every new request
+- 🛡️ **Role-based Access** — Separate `user` and `admin` roles
+- 🛠️ **Admin Dashboard** — Admins can:
+  - View all submissions with full detail (modal popup)
+  - Update submission status (`pending` → `review` → `approved` / `rejected`)
+  - Manage Users — change roles, soft delete, restore
+  - CRUD Workshops — add, edit, soft delete, restore
+  - CRUD Divisions — add, edit, soft delete, restore
+
+---
+
+## 🗂️ Project Structure
 
 ```
-monorepo/
-├── backend/        # Laravel 11 — REST API
-├── frontend/       # React + Vite — SPA
-├── socket-server/  # Node.js + Socket.io — Realtime Server
-└── gowa/           # Go WhatsApp Web Multidevice — WA Gateway
+new_project/
+├── backend/                       # Laravel 11 — REST API
+├── frontend/                      # React + Vite — SPA
+├── socket-server/                 # Node.js + Socket.io — Realtime Server
+└── go-whatsapp-web-multidevice/   # Go WhatsApp Web Multidevice — WA Gateway
 ```
 
 ---
 
-## 🛠️ Teknologi
+## 🛠️ Tech Stack
 
-| Layer | Teknologi |
-|-------|-----------|
+| Layer | Technology |
+|-------|------------|
 | Backend | Laravel 11, Sanctum, MySQL |
-| Frontend | React 18, Vite, Axios |
+| Frontend | React 18, Vite, Axios, Recharts |
 | Realtime | Node.js, Socket.io |
 | WA Gateway | Go WhatsApp Web Multidevice (Gowa) |
 | Auth | Laravel Sanctum (token-based) + Google OAuth |
 
 ---
 
-## ⚙️ Cara Install & Setup
+## ⚙️ Installation & Setup
 
-### Prasyarat
+### Prerequisites
 
-Pastikan sudah terinstall:
+Make sure the following are installed:
 - PHP >= 8.2
 - Composer
 - Node.js >= 18
 - MySQL
-- Docker & Docker Compose (untuk Gowa)
+- Docker & Docker Compose (for Gowa)
 
 ---
 
-### 1. Clone Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/FerryBastian/sistem-pengajuan-barang-whatsapp.git
@@ -73,7 +88,7 @@ cd sistem-pengajuan-barang-whatsapp
 
 ---
 
-### 2. Setup Backend (Laravel)
+### 2. Backend Setup (Laravel)
 
 ```bash
 cd backend
@@ -82,7 +97,7 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-Edit file `.env` sesuai konfigurasi berikut:
+Edit `.env` with the following configuration:
 
 ```env
 APP_URL=http://localhost:8000
@@ -90,7 +105,7 @@ APP_URL=http://localhost:8000
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=nama_database
+DB_DATABASE=your_database
 DB_USERNAME=root
 DB_PASSWORD=
 
@@ -107,20 +122,21 @@ GOWA_USERNAME=user1
 GOWA_PASSWORD=pass1
 ```
 
-Jalankan migrasi dan storage link:
+Run migrations and link storage:
 
 ```bash
 php artisan migrate
+php artisan db:seed     # creates default admin account
 php artisan storage:link
 php artisan config:clear
 php artisan cache:clear
 ```
 
-> **Catatan:** `php artisan storage:link` wajib dijalankan agar file upload referensi gambar bisa diakses publik.
+> **Note:** `php artisan storage:link` is required to make uploaded reference images publicly accessible.
 
 ---
 
-### 3. Setup Frontend (React)
+### 3. Frontend Setup (React)
 
 ```bash
 cd ../frontend
@@ -128,7 +144,7 @@ npm install
 cp .env.example .env
 ```
 
-Edit file `.env`:
+Edit `.env`:
 
 ```env
 VITE_API_BASE_URL=http://localhost:8000/api/v1
@@ -139,25 +155,25 @@ VITE_SOCKET_URL=http://localhost:3001
 
 ---
 
-### 4. Setup Socket Server
+### 4. Socket Server Setup
 
 ```bash
 cd ../socket-server
 npm install
 ```
 
-Tidak ada konfigurasi tambahan — socket server berjalan di port `3001` secara default.
+No additional configuration needed — the socket server runs on port `3001` by default.
 
 ---
 
-### 5. Setup Gowa (WA Gateway)
+### 5. Gowa Setup (WA Gateway)
 
 ```bash
-cd ../gowa
+cd ../go-whatsapp-web-multidevice
 cp src/.env.example src/.env
 ```
 
-Edit file `src/.env` Gowa:
+Edit `src/.env`:
 
 ```env
 APP_PORT=8111
@@ -165,51 +181,41 @@ APP_HOST=0.0.0.0
 APP_BASIC_AUTH=user1:pass1
 ```
 
-Jalankan Gowa via Docker Compose:
+Start Gowa via Docker Compose:
 
 ```bash
 docker compose up -d
 ```
 
-Gowa akan berjalan di `http://localhost:3000`. Buka di browser, lalu scan QR code dengan WhatsApp yang akan digunakan sebagai pengirim notifikasi.
+Gowa will be available at `http://localhost:3000`. Open it in your browser and scan the QR code with the WhatsApp account to be used as the notification sender.
 
-> **Catatan:** Port yang diekspos adalah `3000` (host) yang diteruskan ke `8111` (container). Pastikan `GOWA_URL` di `.env` Laravel diisi `http://localhost:3000`.
+> **Note:** The exposed host port is `3000`, forwarded to `8111` inside the container. Make sure `GOWA_URL` in Laravel's `.env` is set to `http://localhost:3000`.
 
 ---
 
-## 🚀 Cara Menjalankan Project
+## 🚀 Running the Project
 
-Jalankan keempat service secara bersamaan di terminal terpisah:
+Run all four services simultaneously in separate terminals:
 
-**Terminal 1 — Backend:**
 ```bash
-cd backend
-php artisan serve
-# Berjalan di http://localhost:8000
+# Terminal 1 — Backend
+cd backend && php artisan serve
+# Running at http://localhost:8000
+
+# Terminal 2 — Frontend
+cd frontend && npm run dev
+# Running at http://localhost:5173
+
+# Terminal 3 — Socket Server
+cd socket-server && node index.js
+# Running at http://localhost:3001
+
+# Terminal 4 — Gowa
+cd go-whatsapp-web-multidevice && docker compose up -d
+# Running at http://localhost:3000
 ```
 
-**Terminal 2 — Frontend:**
-```bash
-cd frontend
-npm run dev
-# Berjalan di http://localhost:5173
-```
-
-**Terminal 3 — Socket Server:**
-```bash
-cd socket-server
-node index.js
-# Berjalan di http://localhost:3001
-```
-
-**Terminal 4 — Gowa:**
-```bash
-cd gowa
-docker compose up -d
-# Berjalan di http://localhost:3000
-```
-
-Buka browser ke `http://localhost:5173`.
+Open your browser at `http://localhost:5173`.
 
 ---
 
@@ -217,37 +223,35 @@ Buka browser ke `http://localhost:5173`.
 
 ### Backend (`backend/.env`)
 
-| Variable | Keterangan |
-|----------|------------|
-| `APP_URL` | URL aplikasi Laravel |
-| `DB_DATABASE` | Nama database MySQL |
-| `DB_USERNAME` | Username database |
-| `DB_PASSWORD` | Password database |
-| `GOOGLE_CLIENT_ID` | Client ID dari Google Cloud Console |
-| `GOOGLE_CLIENT_SECRET` | Client Secret dari Google Cloud Console |
-| `GOWA_URL` | URL Gowa yang berjalan (default: `http://localhost:3000`) |
-| `GOWA_ADMIN_PHONE` | Nomor WA admin penerima notifikasi (format: `628xxx`) |
-| `GOWA_DEVICE_ID` | Device ID nomor WA pengirim dari Gowa |
-| `GOWA_USERNAME` | Username basic auth Gowa |
-| `GOWA_PASSWORD` | Password basic auth Gowa |
+| Variable | Description |
+|----------|-------------|
+| `APP_URL` | Laravel application URL |
+| `DB_DATABASE` | MySQL database name |
+| `DB_USERNAME` | Database username |
+| `DB_PASSWORD` | Database password |
+| `GOOGLE_CLIENT_ID` | Client ID from Google Cloud Console |
+| `GOOGLE_CLIENT_SECRET` | Client Secret from Google Cloud Console |
+| `GOWA_URL` | Gowa running URL (default: `http://localhost:3000`) |
+| `GOWA_ADMIN_PHONE` | Admin WA number for notifications (format: `628xxx`) |
+| `GOWA_DEVICE_ID` | Sender device ID from Gowa |
+| `GOWA_USERNAME` | Gowa basic auth username |
+| `GOWA_PASSWORD` | Gowa basic auth password |
 
 ### Frontend (`frontend/.env`)
 
-| Variable | Keterangan |
-|----------|------------|
-| `VITE_API_BASE_URL` | Base URL API Laravel (contoh: `http://localhost:8000/api/v1`) |
-| `VITE_BACKEND_APP_URL` | URL backend untuk akses file storage |
-| `VITE_GOOGLE_CLIENT_ID` | Client ID Google OAuth |
-| `VITE_SOCKET_URL` | URL Socket.io server (default: `http://localhost:3001`) |
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_BASE_URL` | Laravel API base URL (e.g. `http://localhost:8000/api/v1`) |
+| `VITE_BACKEND_APP_URL` | Backend URL for accessing file storage |
+| `VITE_GOOGLE_CLIENT_ID` | Google OAuth Client ID |
+| `VITE_SOCKET_URL` | Socket.io server URL (default: `http://localhost:3001`) |
 
-### Gowa (`gowa/src/.env`)
+### Gowa (`go-whatsapp-web-multidevice/src/.env`)
 
-| Variable | Keterangan |
-|----------|------------|
-| `APP_PORT` | Port internal container Gowa (default: `8111`) |
-| `APP_BASIC_AUTH` | Kredensial basic auth (format: `user:pass`) |
-
-> Port yang diekspos ke host adalah `3000` sesuai konfigurasi `docker-compose.yml`.
+| Variable | Description |
+|----------|-------------|
+| `APP_PORT` | Internal container port (default: `8111`) |
+| `APP_BASIC_AUTH` | Basic auth credentials (format: `user:pass`) |
 
 ---
 
@@ -257,161 +261,177 @@ Base URL: `http://localhost:8000/api/v1`
 
 ### Auth
 
-| Method | Endpoint | Deskripsi | Auth |
-|--------|----------|-----------|------|
-| POST | `/register` | Registrasi user baru | ❌ |
-| POST | `/login` | Login email/password | ❌ |
-| POST | `/oauth/google` | Login dengan Google | ❌ |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/register` | Register new user | ❌ |
+| POST | `/login` | Email/password login | ❌ |
+| POST | `/oauth/google` | Google OAuth login | ❌ |
 | POST | `/logout` | Logout | ✅ |
-| GET | `/me` | Info user yang login | ✅ |
+| GET | `/me` | Get authenticated user info | ✅ |
 
 ### Submissions (User)
 
-| Method | Endpoint | Deskripsi | Auth |
-|--------|----------|-----------|------|
-| POST | `/submit` | Kirim pengajuan barang (multipart/form-data) | ✅ |
-| GET | `/my-submissions` | Daftar pengajuan milik user | ✅ |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/submit` | Submit a procurement request (multipart/form-data) | ✅ |
+| GET | `/my-submissions` | Get all submissions by the logged-in user | ✅ |
+| PATCH | `/submissions/{id}/cancel` | Cancel a pending submission | ✅ |
 
 ### Master Data (Public)
 
-| Method | Endpoint | Deskripsi | Auth |
-|--------|----------|-----------|------|
-| GET | `/workshops` | Daftar workshop aktif (untuk dropdown) | ❌ |
-| GET | `/divisions` | Daftar divisi aktif (untuk dropdown) | ❌ |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/workshops` | List active workshops (for dropdown) | ❌ |
+| GET | `/divisions` | List active divisions (for dropdown) | ❌ |
 
 ### Admin — Submissions
 
-| Method | Endpoint | Deskripsi | Auth |
-|--------|----------|-----------|------|
-| GET | `/admin/dashboard` | Statistik dashboard admin | ✅ Admin |
-| GET | `/admin/submissions` | Semua pengajuan (with user, workshop, division) | ✅ Admin |
-| PATCH | `/admin/submissions/{id}/status` | Update status + emit Socket.io | ✅ Admin |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/admin/dashboard` | Dashboard statistics + chart data | ✅ Admin |
+| GET | `/admin/submissions` | All submissions (with user, workshop, division) | ✅ Admin |
+| PATCH | `/admin/submissions/{id}/status` | Update submission status + emit Socket.io | ✅ Admin |
+
+### Admin — User Management
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/admin/users` | All users (including soft deleted) | ✅ Admin |
+| PATCH | `/admin/users/{id}/role` | Update user role | ✅ Admin |
+| DELETE | `/admin/users/{id}` | Soft delete user | ✅ Admin |
+| PATCH | `/admin/users/{id}/restore` | Restore deleted user | ✅ Admin |
 
 ### Admin — Workshop CRUD
 
-| Method | Endpoint | Deskripsi | Auth |
-|--------|----------|-----------|------|
-| GET | `/admin/workshops` | Semua workshop (termasuk yang dihapus) | ✅ Admin |
-| POST | `/admin/workshops` | Tambah workshop baru | ✅ Admin |
-| PUT | `/admin/workshops/{id}` | Edit workshop | ✅ Admin |
-| DELETE | `/admin/workshops/{id}` | Hapus workshop (soft delete) | ✅ Admin |
-| PATCH | `/admin/workshops/{id}/restore` | Pulihkan workshop yang dihapus | ✅ Admin |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/admin/workshops` | All workshops (including deleted) | ✅ Admin |
+| POST | `/admin/workshops` | Create workshop | ✅ Admin |
+| PUT | `/admin/workshops/{id}` | Update workshop | ✅ Admin |
+| DELETE | `/admin/workshops/{id}` | Soft delete workshop | ✅ Admin |
+| PATCH | `/admin/workshops/{id}/restore` | Restore workshop | ✅ Admin |
 
-### Admin — Divisi CRUD
+### Admin — Division CRUD
 
-| Method | Endpoint | Deskripsi | Auth |
-|--------|----------|-----------|------|
-| GET | `/admin/divisions` | Semua divisi (termasuk yang dihapus) | ✅ Admin |
-| POST | `/admin/divisions` | Tambah divisi baru | ✅ Admin |
-| PUT | `/admin/divisions/{id}` | Edit divisi | ✅ Admin |
-| DELETE | `/admin/divisions/{id}` | Hapus divisi (soft delete) | ✅ Admin |
-| PATCH | `/admin/divisions/{id}/restore` | Pulihkan divisi yang dihapus | ✅ Admin |
-
----
-
-## 🔔 Alur Notifikasi Realtime (Socket.io)
-
-```
-Admin ubah status pengajuan
-        ↓
-Laravel update status di database
-        ↓
-Laravel POST ke Socket Server (http://localhost:3001/emit-status)
-        ↓
-Socket Server broadcast event 'notifikasi' ke semua client
-        ↓
-Browser user menerima event
-        ↓
-Status berubah otomatis + notifikasi 🔔 muncul tanpa refresh
-```
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/admin/divisions` | All divisions (including deleted) | ✅ Admin |
+| POST | `/admin/divisions` | Create division | ✅ Admin |
+| PUT | `/admin/divisions/{id}` | Update division | ✅ Admin |
+| DELETE | `/admin/divisions/{id}` | Soft delete division | ✅ Admin |
+| PATCH | `/admin/divisions/{id}/restore` | Restore division | ✅ Admin |
 
 ---
 
-## 📱 Alur Notifikasi WhatsApp
+## 🔔 Real-time Notification Flow (Socket.io)
 
 ```
-User submit pengajuan
+Admin updates submission status
         ↓
-Laravel validasi & simpan ke database
+Laravel updates status in database
         ↓
-Upload file referensi ke storage (jika ada)
+Laravel POST to Socket Server (http://localhost:3001/emit-status)
         ↓
-Laravel kirim request ke Gowa API
+Socket Server broadcasts 'notifikasi' event to all clients
         ↓
-Gowa kirim pesan WA ke nomor admin
+User's browser receives the event
         ↓
-Admin menerima notifikasi WA lengkap
-(nama, workshop, divisi, urgensi, referensi link, dll)
+Status updates instantly + 🔔 notification appears without refresh
 ```
 
-Contoh pesan WA yang diterima admin:
+---
+
+## 📱 WhatsApp Notification Flow
 
 ```
-📦 PENGAJUAN BARANG BARU
+User submits a request
+        ↓
+Laravel validates & saves to database
+        ↓
+Uploads reference file to storage (if any)
+        ↓
+Laravel sends request to Gowa API
+        ↓
+Gowa sends WA message to admin number
+        ↓
+Admin receives full WA notification
+(name, workshop, division, urgency, reference link, etc.)
+```
 
-*Pengaju:* Nama User
-*Email:* user@email.com
-*No. Telp:* 08123456789
+Example WA message received by admin:
+
+```
+📦 NEW PROCUREMENT REQUEST
+
+*Submitted by:* John Doe
+*Email:* john@email.com
+*Phone:* 08123456789
 *Workshop:* Workshop A
-*Divisi:* Divisi B
-*Nama Barang:* Laptop Dell
-*Jumlah:* 1 buah
-*Urgensi:* 🔴 Emergency
-*PIC:* Nama PIC
-*Kegunaan:* Untuk keperluan kerja
-*Spesifikasi:* RAM 16GB, SSD 512GB
-*Keterangan:* -
-*Referensi:* https://tokopedia.com/...
+*Division:* Division B
+*Item:* Dell Laptop
+*Quantity:* 1 unit
+*Urgency:* 🔴 Emergency
+*PIC:* Jane Doe
+*Usage:* For daily work operations
+*Specs:* 16GB RAM, 512GB SSD
+*Notes:* -
+*Reference:* https://tokopedia.com/...
 
-*Tanggal:* 7 Maret 2026, 02:17
-*ID Pengajuan:* #1
+*Date:* 7 March 2026, 02:17
+*Request ID:* #1
 ```
 
 ---
 
-## 👤 Manajemen Role
+## 👤 Role Management
 
-Role user di-set manual via Laravel Tinker setelah migrasi:
+Roles are managed via Laravel Tinker after migration, or through the Admin Dashboard UI.
 
 ```bash
 php artisan tinker
 ```
 
 ```php
-// Set user sebagai admin
-\App\Models\User::where('email', 'emailadmin@gmail.com')->update(['role' => 'admin']);
+// Set user as admin
+\App\Models\User::where('email', 'admin@email.com')->update(['role' => 'admin']);
 
-// Set user kembali ke user biasa
-\App\Models\User::where('email', 'email@gmail.com')->update(['role' => 'user']);
+// Set user back to regular user
+\App\Models\User::where('email', 'user@email.com')->update(['role' => 'user']);
 ```
+
+The default admin account created by seeder:
+- **Email:** `admin@dtech.com`
+- **Password:** `admin123`
+
+> ⚠️ Change the default password immediately after first login in production.
 
 ---
 
-## 📦 Format Pengajuan Barang
+## 📦 Request Submission Fields
 
-Form pengajuan dikirim menggunakan `multipart/form-data` karena mendukung upload file. Field yang tersedia:
+Requests are submitted using `multipart/form-data` to support file uploads:
 
-| Field | Tipe | Wajib | Keterangan |
-|-------|------|-------|------------|
-| `workshop_id` | integer | ❌ | ID workshop dari dropdown |
-| `division_id` | integer | ❌ | ID divisi dari dropdown |
-| `title` | string | ✅ | Nama barang |
-| `quantity` | integer | ✅ | Jumlah barang |
-| `unit` | string | ❌ | Satuan (default: `pcs`) |
-| `spesifikasi` | string | ❌ | Spesifikasi teknis barang |
-| `kegunaan` | string | ✅ | Kegunaan barang |
-| `content` | string | ❌ | Keterangan tambahan |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `workshop_id` | integer | ❌ | Workshop ID from dropdown |
+| `division_id` | integer | ❌ | Division ID from dropdown |
+| `title` | string | ✅ | Item name |
+| `quantity` | integer | ✅ | Quantity |
+| `unit` | string | ❌ | Unit (default: `pcs`) |
+| `spesifikasi` | string | ❌ | Technical specifications |
+| `kegunaan` | string | ✅ | Usage / purpose |
+| `content` | string | ❌ | Additional notes |
 | `urgency` | enum | ✅ | `standart` / `urgent` / `emergency` |
-| `pic` | string | ✅ | Nama penanggung jawab |
-| `nomor_telepon` | string | ❌ | Nomor telepon PIC |
-| `referensi_link` | url | ❌ | Link referensi barang |
-| `referensi_gambar` | file | ❌ | Gambar/PDF referensi (max 10MB) |
+| `pic` | string | ✅ | Person in charge |
+| `nomor_telepon` | string | ❌ | PIC phone number |
+| `referensi_link` | url | ❌ | Reference link |
+| `referensi_gambar` | file | ❌ | Image/PDF reference (max 10MB) |
 
 ---
 
 ## 🔧 Google OAuth Setup
 
-Agar login Google berfungsi, tambahkan origins berikut di **Google Cloud Console → Credentials → Authorized JavaScript Origins**:
+To enable Google login, add the following to **Google Cloud Console → Credentials → Authorized JavaScript Origins**:
 
 ```
 http://localhost:5173
@@ -419,10 +439,10 @@ http://localhost:5174
 http://localhost:5175
 ```
 
-Dan tambahkan akun email ke **OAuth consent screen → Test Users** selama masih dalam mode testing.
+Add test accounts to **OAuth consent screen → Test Users** while in testing mode.
 
 ---
 
-## 📄 Lisensi
+## 📄 License
 
-MIT License — bebas digunakan dan dimodifikasi.
+MIT License — free to use and modify.

@@ -139,7 +139,6 @@ export default function Layout({ children }) {
 
     return (
       <div style={{ display: "flex", minHeight: "100vh", fontFamily: "'Sora', 'Barlow', sans-serif", background: "#EBF6FA" }}>
-        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
         <style>{globalStyles}{`
           .admin-sidebar { display: flex; width: 230px; flex-shrink: 0; position: sticky; top: 0; height: 100vh; box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
           .admin-mobile-header { display: none; }
@@ -216,7 +215,6 @@ export default function Layout({ children }) {
   // ── USER / GUEST LAYOUT ──
   return (
     <div className="min-h-screen" style={{ background: "#EBF6FA" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet" />
       <style>{globalStyles}{`
         @media(max-width:640px){
           .user-nav-desktop { display: none !important; }

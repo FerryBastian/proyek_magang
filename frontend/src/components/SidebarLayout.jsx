@@ -1,39 +1,54 @@
+/**
+ * Unified Sidebar Layout Component
+ * - Works for both Admin and User roles
+ * - Collapsible sidebar on desktop
+ * - Mobile drawer navigation
+ * - Consistent styling with your project design
+ */
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { LogoutModal } from "./Modals";
 
 export default function SidebarLayout({ children }) {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
+  // Navigation items based on role
   const adminNav = [
-    { path: "/admin",              icon: "📊", label: "Dashboard" },
-    { path: "/admin/submissions",  icon: "📋", label: "Pengajuan" },
-    { path: "/admin/workshops",    icon: "🏭", label: "Workshop" },
-    { path: "/admin/divisions",    icon: "🏢", label: "Divisi" },
-    { path: "/admin/users",        icon: "👥", label: "User Management" },
+    { path: "/admin", icon: "📊", label: "Dashboard" },
+    { path: "/admin/submissions", icon: "📋", label: "Pengajuan" },
+    { path: "/admin/workshops", icon: "🏭", label: "Workshop" },
+    { path: "/admin/divisions", icon: "🏢", label: "Divisi" },
+    { path: "/admin/users", icon: "👥", label: "User Management" },
   ];
 
   const userNav = [
-    { path: "/user",         icon: "📦", label: "Ajukan Barang" },
+    { path: "/user", icon: "📦", label: "Ajukan Barang" },
     { path: "/user/riwayat", icon: "📋", label: "Riwayat Pengajuan" },
   ];
 
   const navItems = user?.role === "admin" ? adminNav : userNav;
   const dashboardPath = user?.role === "admin" ? "/admin" : "/user";
   const isActive = (path) => location.pathname === path;
+  const currentLabel = navItems.find(n => isActive(n.path))?.label || "Dashboard";
 
-  const handleLogout = () => { setShowLogoutModal(false); logout(); };
+  const handleLogout = () => {
+    setShowLogoutModal(false);
+    logout();
+  };
 
+  // Sidebar content component
   const SidebarContent = ({ mobile = false }) => (
     <div style={{
       display: "flex", flexDirection: "column", height: "100%",
       background: "linear-gradient(180deg, #001a2e 0%, #003f5c 60%, #0077A8 100%)",
     }}>
-      {/* Logo */}
+      {/* Logo Section */}
       <div style={{
         padding: collapsed && !mobile ? "20px 12px" : "20px 20px",
         borderBottom: "1px solid rgba(255,255,255,0.08)",
@@ -65,7 +80,7 @@ export default function SidebarLayout({ children }) {
         )}
       </div>
 
-      {/* User Info */}
+      {/* User Profile Section */}
       <div style={{
         padding: collapsed && !mobile ? "16px 12px" : "16px 20px",
         borderBottom: "1px solid rgba(255,255,255,0.08)",
@@ -98,7 +113,7 @@ export default function SidebarLayout({ children }) {
         )}
       </div>
 
-      {/* Nav Items */}
+      {/* Navigation Items */}
       <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
         {navItems.map((item) => (
           <Link key={item.path} to={item.path}
@@ -132,7 +147,7 @@ export default function SidebarLayout({ children }) {
         ))}
       </nav>
 
-      {/* Logout */}
+      {/* Logout Button */}
       <div style={{ padding: "12px 10px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
         <button onClick={() => setShowLogoutModal(true)} style={{
           display: "flex", alignItems: "center", gap: 12,
@@ -153,11 +168,8 @@ export default function SidebarLayout({ children }) {
     </div>
   );
 
-  const currentLabel = navItems.find(n => isActive(n.path))?.label || "Dashboard";
-
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#EBF6FA", fontFamily: "'Barlow', sans-serif" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       <style>{`
         * { box-sizing: border-box; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -252,27 +264,7 @@ export default function SidebarLayout({ children }) {
       </div>
 
       {/* Logout Modal */}
-      {showLogoutModal && (
-        <div className="lm-backdrop" onClick={() => setShowLogoutModal(false)} style={{
-          position: "fixed", inset: 0, zIndex: 1000,
-          background: "rgba(15,10,40,0.45)", backdropFilter: "blur(4px)",
-          display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
-        }}>
-          <div className="lm-modal" onClick={e => e.stopPropagation()} style={{
-            background: "#fff", borderRadius: 20, padding: "36px 32px",
-            width: "100%", maxWidth: 400, textAlign: "center",
-            boxShadow: "0 24px 64px rgba(0,119,168,0.2)", border: "1px solid #cce6f0",
-          }}>
-            <div style={{ width: 68, height: 68, borderRadius: "50%", margin: "0 auto 20px", background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>🚪</div>
-            <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "#0D3040" }}>Konfirmasi Logout</h3>
-            <p style={{ margin: "0 0 28px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>Apakah kamu yakin ingin keluar dari akun ini?</p>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setShowLogoutModal(false)} style={{ flex: 1, padding: "13px", background: "#f5fbfd", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, fontWeight: 600, color: "#6B7280", cursor: "pointer" }}>Batal</button>
-              <button onClick={handleLogout} style={{ flex: 1, padding: "13px", background: "linear-gradient(135deg, #EF4444, #DC2626)", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer", boxShadow: "0 4px 14px rgba(239,68,68,0.35)" }}>Ya, Logout</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <LogoutModal show={showLogoutModal} onConfirm={handleLogout} onCancel={() => setShowLogoutModal(false)} />
     </div>
   );
 }

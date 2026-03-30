@@ -127,16 +127,23 @@ class AdminController extends Controller
 
         $submission->update(['status' => $request->status]);
 
-        try {
-            $response = Http::post('http://localhost:3001/emit-status', [
-                'user_id'       => $submission->user_id,
-                'submission_id' => $submission->id,
-                'status'        => $submission->status,
-                'title'         => $submission->title,
-            ]);
-            \Log::info('Socket response: ' . $response->body());
-        } catch (\Exception $e) {
-            \Log::error('Socket.io emit gagal: ' . $e->getMessage());
+        // Check if socket URL is configured
+        $socketUrl = config('services.socket.url');
+        
+        if (!$socketUrl) {
+            \Log::info('Socket URL not configured, skipping emit');
+        } else {
+            try {
+                $response = Http::post("{$socketUrl}/emit-status", [
+                    'user_id'       => $submission->user_id,
+                    'submission_id' => $submission->id,
+                    'status'        => $submission->status,
+                    'title'         => $submission->title,
+                ]);
+                \Log::info('Socket response: ' . $response->body());
+            } catch (\Exception $e) {
+                \Log::error('Socket.io emit gagal: ' . $e->getMessage());
+            }
         }
 
         return response()->json([

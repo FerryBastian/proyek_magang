@@ -1,20 +1,6 @@
 import { useState, useEffect } from "react";
-
-function AlertModal({ show, message, onClose }) {
-  if (!show) return null;
-  return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(15,10,40,0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, animation: "backdropIn 0.2s ease forwards" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, padding: "36px 32px", width: "100%", maxWidth: 400, textAlign: "center", boxShadow: "0 24px 64px rgba(0,119,168,0.2)", border: "1px solid #cce6f0", animation: "modalIn 0.25s ease forwards" }}>
-        <div style={{ width: 68, height: 68, borderRadius: "50%", margin: "0 auto 20px", background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>⚠️</div>
-        <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "#0D3040" }}>Terjadi Kesalahan</h3>
-        <p style={{ margin: "0 0 28px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>{message}</p>
-        <button onClick={onClose} style={{ width: "100%", padding: "13px", background: "linear-gradient(135deg, #0077A8, #0096C7)", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer" }}>OK</button>
-      </div>
-    </div>
-  );
-}
-
 import API from "../../services/api";
+import { AlertModal, ConfirmModal, SuccessBanner } from "../../components/Modals";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -91,7 +77,6 @@ export default function UserManagement() {
 
   return (
     <div style={{ fontFamily: "'Sora', 'Plus Jakarta Sans', sans-serif" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: fadeIn 0.3s ease forwards; }
@@ -144,12 +129,7 @@ export default function UserManagement() {
       </div>
 
       {/* Success Message */}
-      {successMsg && (
-        <div className="fade-in" style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 12, padding: "12px 16px", marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
-          <span>✅</span>
-          <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#15803D" }}>{successMsg}</p>
-        </div>
-      )}
+      <SuccessBanner message={successMsg} onClose={() => setSuccessMsg("")} />
 
       {/* Main Container */}
       <div style={{ background: "#fff", borderRadius: 20, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #F0EFFE", overflow: "hidden" }}>
@@ -287,18 +267,13 @@ export default function UserManagement() {
       <AlertModal show={!!alertMsg} message={alertMsg} onClose={() => setAlertMsg("")} />
 
       {confirmDelete && (
-        <div className="lm-backdrop" onClick={() => setConfirmDelete(null)} style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(15,10,40,0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <div className="lm-modal" onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, padding: "36px 32px", width: "100%", maxWidth: 400, textAlign: "center", boxShadow: "0 24px 64px rgba(239,68,68,0.15)", border: "1px solid #FECACA" }}>
-            <div style={{ width: 68, height: 68, borderRadius: "50%", margin: "0 auto 20px", background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)", border: "2px solid #FECDD3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>🗑️</div>
-            <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "#1E1B4B" }}>Hapus User?</h3>
-            <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 600, color: "#4B5563" }}>{confirmDelete.name}</p>
-            <p style={{ margin: "0 0 28px", fontSize: 13, color: "#9CA3AF", lineHeight: 1.6 }}>User akan dihapus sementara dan bisa dipulihkan kembali.</p>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setConfirmDelete(null)} style={{ flex: 1, padding: "13px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: 12, fontSize: 14, fontWeight: 600, color: "#6B7280" }}>Batal</button>
-              <button onClick={() => handleDelete(confirmDelete)} style={{ flex: 1, padding: "13px", background: "linear-gradient(135deg, #EF4444, #DC2626)", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700, color: "#fff" }}>Ya, Hapus</button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          show={!!confirmDelete}
+          title="Hapus User?"
+          message={`User akan dihapus sementara dan bisa dipulihkan kembali.`}
+          onConfirm={() => handleDelete(confirmDelete)}
+          onCancel={() => setConfirmDelete(null)}
+        />
       )}
     </div>
   );
