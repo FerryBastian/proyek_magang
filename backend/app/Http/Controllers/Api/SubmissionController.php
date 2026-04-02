@@ -16,18 +16,18 @@ class SubmissionController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'workshop_id'      => 'nullable|exists:workshops,id',
-            'division_id'      => 'nullable|exists:divisions,id',
-            'title'            => 'required|string|max:255',
-            'quantity'         => 'nullable|integer|min:1',
-            'unit'             => 'nullable|string|max:50',
-            'spesifikasi'      => 'nullable|string',
-            'kegunaan'         => 'required|string',
-            'content'          => 'nullable|string',
-            'urgency'          => 'required|in:standart,urgent,emergency',
-            'pic'              => 'required|string|max:255',
-            'nomor_telepon'    => 'nullable|string|max:20',
-            'referensi_link'   => 'nullable|url',
+            'workshop_id' => 'nullable|exists:workshops,id',
+            'division_id' => 'nullable|exists:divisions,id',
+            'title' => 'required|string|max:255',
+            'quantity' => 'nullable|integer|min:1',
+            'unit' => 'nullable|string|max:50',
+            'spesifikasi' => 'nullable|string',
+            'kegunaan' => 'required|string',
+            'content' => 'nullable|string',
+            'urgency' => 'required|in:standart,urgent,emergency',
+            'pic' => 'required|string|max:255',
+            'nomor_telepon' => 'nullable|string|max:20',
+            'referensi_link' => 'nullable|url',
             'referensi_gambar' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
@@ -35,20 +35,20 @@ class SubmissionController extends Controller
 
         $submission = DB::transaction(function () use ($user, $request) {
             $data = [
-                'user_id'        => $user->id,
-                'workshop_id'    => $request->input('workshop_id'),
-                'division_id'    => $request->input('division_id'),
-                'title'          => $request->string('title'),
-                'quantity'       => $request->integer('quantity'),
-                'unit'           => $request->string('unit') ?: 'pcs',
-                'spesifikasi'    => $request->string('spesifikasi') ?: null,
-                'kegunaan'       => $request->string('kegunaan'),
-                'content'        => $request->string('content') ?: null,
-                'urgency'        => $request->string('urgency') ?: 'standart',
-                'pic'            => $request->string('pic'),
-                'nomor_telepon'  => $request->string('nomor_telepon') ?: null,
+                'user_id' => $user->id,
+                'workshop_id' => $request->input('workshop_id'),
+                'division_id' => $request->input('division_id'),
+                'title' => $request->string('title'),
+                'quantity' => $request->integer('quantity'),
+                'unit' => $request->string('unit') ?: 'pcs',
+                'spesifikasi' => $request->string('spesifikasi') ?: null,
+                'kegunaan' => $request->string('kegunaan'),
+                'content' => $request->string('content') ?: null,
+                'urgency' => $request->string('urgency') ?: 'standart',
+                'pic' => $request->string('pic'),
+                'nomor_telepon' => $request->string('nomor_telepon') ?: null,
                 'referensi_link' => $request->string('referensi_link') ?: null,
-                'status'         => 'pending',
+                'status' => 'pending',
             ];
 
             if ($request->hasFile('referensi_gambar')) {
@@ -63,7 +63,7 @@ class SubmissionController extends Controller
 
         return response()->json([
             'message' => 'Submission created',
-            'data'    => $submission->load(['user:id,name,email', 'workshop', 'division']),
+            'data' => $submission->load(['user:id,name,email', 'workshop', 'division']),
         ], 201);
     }
 
@@ -80,35 +80,38 @@ class SubmissionController extends Controller
 
     public function cancel(Request $request, Submission $submission): JsonResponse
     {
-        // Pastikan submission milik user yang login
         if ($submission->user_id !== $request->user()->id) {
-            return response()->json([
-                'message' => 'Tidak diizinkan membatalkan pengajuan ini',
-            ], 403);
+            return response()->json(['message' => 'Tidak diizinkan'], 403);
         }
 
-        // Hanya bisa cancel kalau masih pending
         if ($submission->status !== 'pending') {
-            return response()->json([
-                'message' => 'Pengajuan hanya bisa dibatalkan saat masih berstatus pending',
-            ], 422);
+            return response()->json(['message' => 'Hanya pengajuan pending yang bisa dibatalkan'], 422);
         }
 
-        $submission->update(['status' => 'cancelled', 'cancelled_by' => 'user']);
+        $validated = $request->validate([
+            'reason' => 'required|string|min:10|max:500',
+        ]);
+
+        $submission->update([
+            'status' => 'cancelled',
+            'cancel_reason' => $validated['reason'],
+            'cancelled_by' => 'user',
+            'cancelled_at' => now(),
+        ]);
 
         return response()->json([
             'message' => 'Pengajuan berhasil dibatalkan',
-            'data'    => $submission,
+            'data' => $submission->fresh(),
         ]);
     }
 
     private function sendWhatsAppNotification(Submission $submission, $user): void
     {
-        $gowaUrl    = config('services.gowa.url');
+        $gowaUrl = config('services.gowa.url');
         $adminPhone = config('services.gowa.admin_phone');
-        $deviceId   = config('services.gowa.device_id');
-        $username   = config('services.gowa.username');
-        $password   = config('services.gowa.password');
+        $deviceId = config('services.gowa.device_id');
+        $username = config('services.gowa.username');
+        $password = config('services.gowa.password');
 
         if (!$gowaUrl || !$adminPhone) {
             Log::info('Gowa skipped: GOWA_URL atau GOWA_ADMIN_PHONE belum diisi');
@@ -116,8 +119,8 @@ class SubmissionController extends Controller
         }
 
         $urgencyLabel = [
-            'standart'  => '🟢 Standart',
-            'urgent'    => '🟠 Urgent',
+            'standart' => '🟢 Standart',
+            'urgent' => '🟠 Urgent',
             'emergency' => '🔴 Emergency',
         ];
 
@@ -141,8 +144,8 @@ class SubmissionController extends Controller
 
         $payload = [
             'device_id' => $deviceId,
-            'phone'     => $adminPhone,
-            'message'   => $message,
+            'phone' => $adminPhone,
+            'message' => $message,
         ];
 
         try {

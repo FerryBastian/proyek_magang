@@ -1,7 +1,12 @@
 /**
+ * Modals.jsx
+ * Kumpulan semua modal components
+ */
+
+import { useState } from "react";   // ← INI YANG PERLU DITAMBAHKAN
+
+/**
  * Reusable Alert Modal Component
- * - Preserves original styling for mobile responsiveness
- * - Used for error messages and notifications
  */
 export function AlertModal({ show, message, onClose }) {
   if (!show) return null;
@@ -43,8 +48,6 @@ export function AlertModal({ show, message, onClose }) {
 
 /**
  * Reusable Confirm Modal Component
- * - Used for delete/restore confirmations
- * - Customizable title, message, confirm button
  */
 export function ConfirmModal({ 
   show, 
@@ -99,8 +102,166 @@ export function ConfirmModal({
 }
 
 /**
+ * Cancel Submission Modal dengan Alasan Wajib
+ */
+export function CancelSubmissionModal({ 
+  show, 
+  submission, 
+  onConfirm, 
+  onCancel,
+  loading = false 
+}) {
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState("");
+
+  const handleConfirm = () => {
+    if (!reason.trim()) {
+      setError("Alasan pembatalan wajib diisi");
+      return;
+    }
+    setError("");
+    onConfirm(reason.trim());
+  };
+
+  if (!show || !submission) return null;
+
+  return (
+    <div 
+      onClick={onCancel} 
+      style={{
+        position: "fixed", 
+        inset: 0, 
+        zIndex: 1000,
+        background: "rgba(15,10,40,0.45)", 
+        backdropFilter: "blur(4px)",
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center", 
+        padding: 24,
+      }}
+    >
+      <div 
+        onClick={e => e.stopPropagation()} 
+        style={{
+          background: "#fff", 
+          borderRadius: 20, 
+          padding: "32px 28px",
+          width: "100%", 
+          maxWidth: 420, 
+          boxShadow: "0 24px 64px rgba(0,119,168,0.2)", 
+          border: "1px solid #cce6f0",
+        }}
+      >
+        <div style={{
+          width: 68, height: 68, borderRadius: "50%", margin: "0 auto 20px",
+          background: "linear-gradient(135deg, #FFF1F2, #FFE4E6)",
+          border: "2px solid #FECDD3",
+          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32,
+        }}>🚫</div>
+
+        <h3 style={{ 
+          margin: "0 0 8px", 
+          fontSize: 19, 
+          fontWeight: 700, 
+          color: "#0D3040", 
+          textAlign: "center" 
+        }}>
+          Batalkan Pengajuan?
+        </h3>
+
+        <p style={{ 
+          margin: "0 0 24px", 
+          fontSize: 14, 
+          color: "#6B7280", 
+          textAlign: "center", 
+          lineHeight: 1.5 
+        }}>
+          Pengajuan <strong>"{submission.title}"</strong> akan dibatalkan dan tidak bisa diaktifkan kembali.
+        </p>
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ 
+            display: "block", 
+            fontSize: 14, 
+            fontWeight: 600, 
+            color: "#374151", 
+            marginBottom: 8 
+          }}>
+            Alasan Pembatalan <span style={{ color: "#EF4444" }}>*</span>
+          </label>
+          
+          <textarea
+            value={reason}
+            onChange={(e) => {
+              setReason(e.target.value);
+              if (error) setError("");
+            }}
+            placeholder="Jelaskan alasan pembatalan secara jelas..."
+            rows={5}
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              border: `2px solid ${error ? "#EF4444" : "#cce6f0"}`,
+              borderRadius: 14,
+              fontSize: 14.5,
+              resize: "vertical",
+              minHeight: 130,
+              fontFamily: "inherit",
+              outline: "none"
+            }}
+          />
+          
+          {error && (
+            <p style={{ color: "#EF4444", fontSize: 13, marginTop: 6, textAlign: "left" }}>
+              {error}
+            </p>
+          )}
+        </div>
+
+        <div style={{ display: "flex", gap: 12 }}>
+          <button 
+            onClick={onCancel}
+            style={{
+              flex: 1, 
+              padding: "13px", 
+              background: "#f5fbfd",
+              border: "2px solid #cce6f0", 
+              borderRadius: 12, 
+              fontSize: 14.5,
+              fontWeight: 600, 
+              color: "#6B7280", 
+              cursor: "pointer",
+            }}
+          >
+            Kembali
+          </button>
+
+          <button 
+            onClick={handleConfirm}
+            disabled={loading || !reason.trim()}
+            style={{
+              flex: 1, 
+              padding: "13px", 
+              background: loading ? "#9CA3AF" : "linear-gradient(135deg, #EF4444, #DC2626)",
+              border: "none", 
+              borderRadius: 12, 
+              fontSize: 14.5, 
+              fontWeight: 700,
+              color: "#fff", 
+              cursor: loading || !reason.trim() ? "not-allowed" : "pointer",
+              boxShadow: "0 4px 14px rgba(239,68,68,0.35)",
+            }}
+          >
+            {loading ? "Membatalkan..." : "Ya, Batalkan"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Reusable Logout Confirmation Modal
- * - Used for logout confirmation
  */
 export function LogoutModal({ show, onConfirm, onCancel }) {
   if (!show) return null;
@@ -148,7 +309,6 @@ export function LogoutModal({ show, onConfirm, onCancel }) {
 
 /**
  * Reusable Success Message Banner
- * - Shows success/error messages with auto-dismiss
  */
 export function SuccessBanner({ message, onClose }) {
   if (!message) return null;
@@ -174,4 +334,11 @@ export function SuccessBanner({ message, onClose }) {
   );
 }
 
-export default { AlertModal, ConfirmModal, LogoutModal, SuccessBanner };
+// Export semua modal sekaligus
+export default { 
+  AlertModal, 
+  ConfirmModal, 
+  CancelSubmissionModal, 
+  LogoutModal, 
+  SuccessBanner 
+};

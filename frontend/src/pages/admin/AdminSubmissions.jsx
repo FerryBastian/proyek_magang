@@ -13,8 +13,20 @@ function getStatusBadge(status) {
   };
   const c = cfg[status?.toLowerCase()] || cfg.pending;
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 6, background: c.bg, color: c.text, border: `1px solid ${c.border}`, fontSize: 11, fontWeight: 700 }}>
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: c.text, display: "inline-block" }} />{c.label}
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 5,
+      padding: "4px 10px",
+      borderRadius: 6,
+      background: c.bg,
+      color: c.text,
+      border: `1px solid ${c.border}`,
+      fontSize: 11,
+      fontWeight: 700
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: c.text, display: "inline-block" }} />
+      {c.label}
     </span>
   );
 }
@@ -27,8 +39,20 @@ function getUrgencyBadge(urgency) {
   };
   const c = cfg[urgency?.toLowerCase()] || cfg.standart;
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 6, background: `${c.color}18`, color: c.color, border: `1px solid ${c.color}50`, fontSize: 11, fontWeight: 700 }}>
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: c.color, display: "inline-block" }} />{c.label}
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 5,
+      padding: "4px 10px",
+      borderRadius: 6,
+      background: `${c.color}18`,
+      color: c.color,
+      border: `1px solid ${c.color}50`,
+      fontSize: 11,
+      fontWeight: 700
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: c.color, display: "inline-block" }} />
+      {c.label}
     </span>
   );
 }
@@ -46,11 +70,16 @@ export default function AdminSubmissions() {
   const [alertMsg, setAlertMsg] = useState("");
   const backendUrl = import.meta.env.VITE_BACKEND_APP_URL || 'http://localhost:8000';
 
-  useEffect(() => { setStatusFilter(queryStatus); }, [queryStatus]);
+  useEffect(() => {
+    setStatusFilter(queryStatus);
+  }, [queryStatus]);
 
   useEffect(() => {
     setLoading(true);
-    adminApi.getSubmissions().then(res => setData(res.data)).catch(console.log).finally(() => setLoading(false));
+    adminApi.getSubmissions()
+      .then(res => setData(res.data))
+      .catch(console.log)
+      .finally(() => setLoading(false));
   }, []);
 
   const handleStatusChange = async (id, newStatus) => {
@@ -58,15 +87,23 @@ export default function AdminSubmissions() {
     try {
       await adminApi.updateSubmissionStatus(id, newStatus);
       setData(prev => prev.map(item => item.id === id ? { ...item, status: newStatus } : item));
-      if (selectedItem?.id === id) setSelectedItem(prev => ({ ...prev, status: newStatus }));
+      if (selectedItem?.id === id) {
+        setSelectedItem(prev => ({ ...prev, status: newStatus }));
+      }
     } catch (err) {
       setAlertMsg(err?.response?.data?.message || "Gagal mengubah status");
-    } finally { setUpdatingId(null); }
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const filtered = data
     .filter(item => statusFilter === "all" || item.status?.toLowerCase() === statusFilter)
-    .filter(item => !search || item.title?.toLowerCase().includes(search.toLowerCase()) || item.user?.name?.toLowerCase().includes(search.toLowerCase()))
+    .filter(item =>
+      !search ||
+      item.title?.toLowerCase().includes(search.toLowerCase()) ||
+      item.user?.name?.toLowerCase().includes(search.toLowerCase())
+    )
     .sort((a, b) => {
       const aIsCancelled = a.status?.toLowerCase() === "cancelled";
       const bIsCancelled = b.status?.toLowerCase() === "cancelled";
@@ -114,13 +151,6 @@ export default function AdminSubmissions() {
           .mobile-list { display: none !important; }
         }
 
-        @media (max-width: 480px) {
-          .submission-card { padding: 16px; }
-          .submission-card .title { font-size: 14.5px; }
-          .search-wrapper input { padding-left: 50px !important; }
-          .search-wrapper span { left: 17px !important; font-size: 17px !important; }
-        }
-
         .submission-card {
           background: #fff;
           border-radius: 16px;
@@ -137,7 +167,7 @@ export default function AdminSubmissions() {
         .submission-card .title {
           font-size: 15px;
           font-weight: 700;
-          color: #0D3040;
+          color: "#0D3040";
           margin: 10px 0 8px;
           line-height: 1.3;
         }
@@ -150,23 +180,59 @@ export default function AdminSubmissions() {
 
       <AlertModal show={!!alertMsg} message={alertMsg} onClose={() => setAlertMsg("")} />
 
-      {/* ==================== MODAL DETAIL ==================== */}
+      {/* ==================== MODAL DETAIL PENGajuan ==================== */}
       {selectedItem && (
-        <div className="lm-backdrop" onClick={() => setSelectedItem(null)} style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <div className="lm-modal" onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 640, maxHeight: "90vh", overflowY: "auto", border: "1px solid #cce6f0", boxShadow: "0 24px 64px rgba(0,0,0,0.15)" }}>
+        <div
+          className="lm-backdrop"
+          onClick={() => setSelectedItem(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 50,
+            background: "rgba(0,0,0,0.45)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24
+          }}
+        >
+          <div
+            className="lm-modal"
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "#fff",
+              borderRadius: 20,
+              width: "100%",
+              maxWidth: 640,
+              maxHeight: "90vh",
+              overflowY: "auto",
+              border: "1px solid #cce6f0",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.15)"
+            }}
+          >
+            {/* Header Modal */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", borderBottom: "1px solid #e8f4fa" }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#0D3040" }}>{selectedItem.title}</h3>
                 <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9CA3AF" }}>ID #{selectedItem.id}</p>
               </div>
-              <button onClick={() => setSelectedItem(null)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "#9CA3AF" }}>×</button>
+              <button
+                onClick={() => setSelectedItem(null)}
+                style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "#9CA3AF" }}
+              >
+                ×
+              </button>
             </div>
+
             <div style={{ padding: 24 }}>
+              {/* Status & Urgency Badge */}
               <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
                 {getStatusBadge(selectedItem.status)}
                 {getUrgencyBadge(selectedItem.urgency)}
               </div>
 
+              {/* Info Grid */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }} className="modal-grid">
                 {[
                   { label: "Pengaju", value: selectedItem.user?.name },
@@ -194,49 +260,110 @@ export default function AdminSubmissions() {
                 })}
               </div>
 
-              {selectedItem.kegunaan && <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}><p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Kegunaan</p><p style={{ margin: 0, fontSize: 13, color: "#0D3040" }}>{selectedItem.kegunaan}</p></div>}
-              {selectedItem.spesifikasi && <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}><p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Spesifikasi</p><p style={{ margin: 0, fontSize: 13, color: "#0D3040" }}>{selectedItem.spesifikasi}</p></div>}
-              {selectedItem.content && <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}><p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Keterangan Tambahan</p><p style={{ margin: 0, fontSize: 13, color: "#0D3040" }}>{selectedItem.content}</p></div>}
-              {selectedItem.referensi_link && <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}><p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Referensi Link</p><a href={selectedItem.referensi_link} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "#0096C7", wordBreak: "break-all" }}>{selectedItem.referensi_link}</a></div>}
+              {/* Kegunaan, Spesifikasi, dll */}
+              {selectedItem.kegunaan && (
+                <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}>
+                  <p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Kegunaan</p>
+                  <p style={{ margin: 0, fontSize: 13, color: "#0D3040" }}>{selectedItem.kegunaan}</p>
+                </div>
+              )}
+              {selectedItem.spesifikasi && (
+                <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}>
+                  <p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Spesifikasi</p>
+                  <p style={{ margin: 0, fontSize: 13, color: "#0D3040" }}>{selectedItem.spesifikasi}</p>
+                </div>
+              )}
+              {selectedItem.content && (
+                <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}>
+                  <p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Keterangan Tambahan</p>
+                  <p style={{ margin: 0, fontSize: 13, color: "#0D3040" }}>{selectedItem.content}</p>
+                </div>
+              )}
 
-              {selectedItem.referensi_gambar && typeof selectedItem.referensi_gambar === 'string' && (
-                <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 16 }}>
-                  <p style={{ margin: "0 0 8px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Referensi Gambar</p>
-
-                  {selectedItem.referensi_gambar.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                    <img
-                      src={`${backendUrl}/storage/${selectedItem.referensi_gambar}`}
-                      alt="Referensi"
-                      style={{ maxWidth: "100%", borderRadius: 8 }}
-                      onError={(e) => { e.target.style.display = 'none'; }} // hide kalau gambar error
-                    />
-                  ) : (
-                    <a
-                      href={`${backendUrl}/storage/${selectedItem.referensi_gambar}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{ fontSize: 13, color: "#0096C7" }}
-                    >
-                      📄 Lihat File
-                    </a>
+              {/* ==================== ALASAN PEMBATALAN ==================== */}
+              {selectedItem.status?.toLowerCase() === "cancelled" && selectedItem.cancel_reason && (
+                <div style={{
+                  background: "#FFF1F2",
+                  borderRadius: 14,
+                  padding: 18,
+                  border: "2px solid #FECACA",
+                  marginBottom: 20
+                }}>
+                  <p style={{
+                    margin: "0 0 10px",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: "#BE123C",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8
+                  }}>
+                    🚫 Alasan Pembatalan oleh Pengguna
+                  </p>
+                  <p style={{
+                    margin: 0,
+                    fontSize: 15,
+                    lineHeight: 1.7,
+                    color: "#431407",
+                    fontStyle: "italic"
+                  }}>
+                    "{selectedItem.cancel_reason}"
+                  </p>
+                  {selectedItem.cancelled_at && (
+                    <p style={{
+                      margin: "12px 0 0 0",
+                      fontSize: 12.5,
+                      color: "#9CA3AF"
+                    }}>
+                      Dibatalkan pada: {new Date(selectedItem.cancelled_at).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      })}
+                    </p>
                   )}
                 </div>
               )}
 
+              {/* Update Status Section */}
               <div style={{ background: "#EBF6FA", borderRadius: 12, padding: 16, border: "1px solid #cce6f0" }}>
                 <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 600, color: "#0077A8" }}>Update Status</p>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {selectedItem.status === "cancelled" ? (
-                    <div style={{ padding: "12px 16px", background: "#F3F4F6", borderRadius: 10, fontSize: 13, color: "#9CA3AF", textAlign: "center" }}>
-                      🚫 Pengajuan ini dibatalkan oleh pengguna
+                    <div style={{
+                      padding: "12px 16px",
+                      background: "#F3F4F6",
+                      borderRadius: 10,
+                      fontSize: 13,
+                      color: "#9CA3AF",
+                      textAlign: "center",
+                      flex: 1
+                    }}>
+                      🚫 Pengajuan ini sudah dibatalkan oleh pengguna
                     </div>
-                  ) : ["pending", "review", "approved", "rejected"].map(s => (
-                    <button key={s} onClick={() => handleStatusChange(selectedItem.id, s)}
-                      disabled={updatingId === selectedItem.id || selectedItem.status === s}
-                      style={{ padding: "8px 16px", borderRadius: 8, fontSize: 12, fontWeight: 600, border: selectedItem.status === s ? "none" : "1px solid #cce6f0", background: selectedItem.status === s ? "#0096C7" : "#fff", color: selectedItem.status === s ? "#fff" : "#0D3040", cursor: selectedItem.status === s ? "default" : "pointer", opacity: updatingId === selectedItem.id ? 0.5 : 1, textTransform: "capitalize" }}>
-                      {s === "review" ? "In Review" : s.charAt(0).toUpperCase() + s.slice(1)}
-                    </button>
-                  ))}
+                  ) : (
+                    ["pending", "review", "approved", "rejected"].map(s => (
+                      <button
+                        key={s}
+                        onClick={() => handleStatusChange(selectedItem.id, s)}
+                        disabled={updatingId === selectedItem.id || selectedItem.status === s}
+                        style={{
+                          padding: "8px 16px",
+                          borderRadius: 8,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          border: selectedItem.status === s ? "none" : "1px solid #cce6f0",
+                          background: selectedItem.status === s ? "#0096C7" : "#fff",
+                          color: selectedItem.status === s ? "#fff" : "#0D3040",
+                          cursor: selectedItem.status === s ? "default" : "pointer"
+                        }}
+                      >
+                        {s === "review" ? "In Review" : s.charAt(0).toUpperCase() + s.slice(1)}
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -245,7 +372,19 @@ export default function AdminSubmissions() {
       )}
 
       {/* Filters */}
-      <div className="fade-in filters" style={{ padding: "16px 20px", borderBottom: "1px solid #e8f4fa", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", background: "#fff", borderRadius: 20, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #cce6f0", marginBottom: 20 }}>
+      <div className="fade-in filters" style={{
+        padding: "16px 20px",
+        borderBottom: "1px solid #e8f4fa",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        flexWrap: "wrap",
+        background: "#fff",
+        borderRadius: 20,
+        boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
+        border: "1px solid #cce6f0",
+        marginBottom: 20
+      }}>
         <div className="search-wrapper" style={{ position: "relative", flex: 1, minWidth: 200 }}>
           <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", fontSize: 19, color: "#9CA3AF" }}>🔍</span>
           <input
@@ -253,13 +392,35 @@ export default function AdminSubmissions() {
             placeholder="Cari nama barang atau pengaju..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ width: "100%", padding: "12px 16px 12px 52px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, color: "#0D3040", background: "#f5fbfd", fontFamily: "'Barlow', sans-serif", outline: "none" }}
+            style={{
+              width: "100%",
+              padding: "12px 16px 12px 52px",
+              border: "2px solid #cce6f0",
+              borderRadius: 12,
+              fontSize: 14,
+              color: "#0D3040",
+              background: "#f5fbfd",
+              fontFamily: "'Barlow', sans-serif",
+              outline: "none"
+            }}
           />
         </div>
+
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          style={{ padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, color: "#0D3040", background: "#f5fbfd", cursor: "pointer", fontFamily: "'Barlow', sans-serif", outline: "none", minWidth: 160 }}
+          style={{
+            padding: "12px 14px",
+            border: "2px solid #cce6f0",
+            borderRadius: 12,
+            fontSize: 14,
+            color: "#0D3040",
+            background: "#f5fbfd",
+            cursor: "pointer",
+            fontFamily: "'Barlow', sans-serif",
+            outline: "none",
+            minWidth: 160
+          }}
         >
           <option value="all">Semua Status</option>
           <option value="pending">Pending</option>
@@ -268,11 +429,21 @@ export default function AdminSubmissions() {
           <option value="rejected">Rejected</option>
           <option value="cancelled">Cancelled</option>
         </select>
-        <span style={{ padding: "10px 18px", borderRadius: 9999, fontSize: 13, fontWeight: 700, background: "#EBF6FA", color: "#0077A8", whiteSpace: "nowrap" }}>
+
+        <span style={{
+          padding: "10px 18px",
+          borderRadius: 9999,
+          fontSize: 13,
+          fontWeight: 700,
+          background: "#EBF6FA",
+          color: "#0077A8",
+          whiteSpace: "nowrap"
+        }}>
           {filtered.length} pengajuan
         </span>
       </div>
 
+      {/* Loading & Empty State */}
       {loading ? (
         <div style={{ padding: "80px 20px", textAlign: "center", color: "#9CA3AF", fontSize: 15 }}>Memuat data...</div>
       ) : filtered.length === 0 ? (

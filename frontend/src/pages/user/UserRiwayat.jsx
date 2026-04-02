@@ -4,7 +4,7 @@ import API from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import socket from "../../services/socket";
-import { ConfirmModal, SuccessBanner } from "../../components/Modals";
+import { SuccessBanner, CancelSubmissionModal } from "../../components/Modals";
 
 export default function UserRiwayat() {
   const { user } = useAuth();
@@ -16,7 +16,10 @@ export default function UserRiwayat() {
   const [openHistory, setOpenHistory] = useState(null);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [confirmCancel, setConfirmCancel] = useState(null);
+
+  // State untuk modal pembatalan
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedToCancel, setSelectedToCancel] = useState(null);
   const [cancelling, setCancelling] = useState(null);
 
   useEffect(() => {
@@ -29,6 +32,7 @@ export default function UserRiwayat() {
       socket.connect();
       socket.on("connect", () => socket.emit("join", user.id));
     }
+
     socket.on("notifikasi", (data) => {
       submissionsApi.mySubmissions().then(res => setSubmissions(res.data)).catch(console.log);
       setSuccessMsg(`🔔 Status pengajuan "${data.title}" telah diupdate menjadi: ${data.status}`);
@@ -41,18 +45,45 @@ export default function UserRiwayat() {
     };
   }, [user?.id]);
 
-  const handleCancel = async () => {
-    if (!confirmCancel) return;
-    setCancelling(confirmCancel.id);
-    setConfirmCancel(null);
+  // Fungsi untuk membuka modal pembatalan
+  const openCancelModal = (item) => {
+    setSelectedToCancel(item);
+    setShowCancelModal(true);
+  };
+
+  // Fungsi handle cancel dengan alasan (wajib)
+  const handleCancel = async (reason) => {
+    if (!selectedToCancel) return;
+
+    setCancelling(selectedToCancel.id);
+    setShowCancelModal(false);
+
     try {
-      await API.patch(`/submissions/${confirmCancel.id}/cancel`);
-      setSubmissions(prev => prev.map(s => s.id === confirmCancel.id ? { ...s, status: "cancelled" } : s));
-      setSuccessMsg(`✅ Pengajuan "${confirmCancel.title}" berhasil dibatalkan`);
+      await API.patch(`/submissions/${selectedToCancel.id}/cancel`, {
+        reason: reason
+      });
+
+      // Update state lokal
+      setSubmissions(prev =>
+        prev.map(s =>
+          s.id === selectedToCancel.id
+            ? {
+                ...s,
+                status: "cancelled",
+                cancel_reason: reason,
+                cancelled_by: "user",
+                updated_at: new Date().toISOString()
+              }
+            : s
+        )
+      );
+
+      setSuccessMsg(`✅ Pengajuan "${selectedToCancel.title}" berhasil dibatalkan`);
     } catch (err) {
       setSuccessMsg("❌ " + (err?.response?.data?.message || "Gagal membatalkan pengajuan"));
     } finally {
       setCancelling(null);
+      setSelectedToCancel(null);
     }
   };
 
@@ -95,9 +126,28 @@ export default function UserRiwayat() {
   const renderStatusHistory = (item) => {
     const history = item.status_history || [];
     const fallback = [{ status: "pending", note: "Pengajuan dikirim", created_at: item.created_at }];
-    if (["review","approved","rejected"].includes(item.status?.toLowerCase())) fallback.push({ status: "review", note: "Sedang ditinjau oleh admin", created_at: null });
-    if (["approved","rejected"].includes(item.status?.toLowerCase())) fallback.push({ status: item.status, note: item.status === "approved" ? "Pengajuan disetujui" : "Pengajuan ditolak", admin_note: item.admin_note || null, created_at: item.updated_at });
-    if (item.status?.toLowerCase() === "cancelled") fallback.push({ status: "cancelled", note: item.cancelled_by === "admin" ? "Pengajuan dibatalkan oleh admin" : "Pengajuan dibatalkan oleh kamu", created_at: item.updated_at });
+
+    if (["review","approved","rejected"].includes(item.status?.toLowerCase())) {
+      fallback.push({ status: "review", note: "Sedang ditinjau oleh admin", created_at: null });
+    }
+    if (["approved","rejected"].includes(item.status?.toLowerCase())) {
+      fallback.push({ 
+        status: item.status, 
+        note: item.status === "approved" ? "Pengajuan disetujui" : "Pengajuan ditolak", 
+        admin_note: item.admin_note || null, 
+        created_at: item.updated_at 
+      });
+    }
+    if (item.status?.toLowerCase() === "cancelled") {
+      fallback.push({ 
+        status: "cancelled", 
+        note: item.cancelled_by === "admin" 
+          ? "Pengajuan dibatalkan oleh admin" 
+          : "Pengajuan dibatalkan oleh kamu", 
+        created_at: item.updated_at 
+      });
+    }
+
     const display = history.length > 0 ? history : fallback;
 
     return (
@@ -109,14 +159,30 @@ export default function UserRiwayat() {
           return (
             <div key={idx} style={{ display: "flex", gap: 12 }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div style={{ width: 30, height: 30, borderRadius: "50%", flexShrink: 0, background: sc.bg, border: `1.5px solid ${sc.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>{sc.icon}</div>
+                <div style={{ width: 30, height: 30, borderRadius: "50%", flexShrink: 0, background: sc.bg, border: `1.5px solid ${sc.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>
+                  {sc.icon}
+                </div>
                 {!isLast && <div style={{ width: 1.5, flex: 1, background: "#d4eef8", margin: "4px 0", minHeight: 16 }} />}
               </div>
               <div style={{ paddingBottom: isLast ? 4 : 16, flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: sc.text }}>{sc.label}</div>
                 {h.note && <div style={{ fontSize: 12, color: "#7ab3c4", marginTop: 2 }}>{h.note}</div>}
-                {h.admin_note && <div style={{ marginTop: 8, padding: "8px 12px", background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 8, fontSize: 12, color: sc.text }}>💬 Catatan admin: "{h.admin_note}"</div>}
-                {h.created_at && <div style={{ fontSize: 11, color: "#a0c4d4", marginTop: 3 }}>🕐 {new Date(h.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</div>}
+                {h.admin_note && (
+                  <div style={{ marginTop: 8, padding: "8px 12px", background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 8, fontSize: 12, color: sc.text }}>
+                    💬 Catatan admin: "{h.admin_note}"
+                  </div>
+                )}
+                {h.created_at && (
+                  <div style={{ fontSize: 11, color: "#a0c4d4", marginTop: 3 }}>
+                    🕐 {new Date(h.created_at).toLocaleDateString("id-ID", { 
+                      day: "numeric", 
+                      month: "short", 
+                      year: "numeric", 
+                      hour: "2-digit", 
+                      minute: "2-digit" 
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -160,12 +226,19 @@ export default function UserRiwayat() {
           { label: "Ditolak", value: stats.rejected, color: "#EF4444", bg: "#FFF1F2", filter: "rejected" },
           { label: "Dibatalkan", value: stats.cancelled, color: "#9CA3AF", bg: "#F3F4F6", filter: "cancelled" },
         ].map(s => (
-          <div key={s.label} onClick={() => setFilterStatus(filterStatus === s.filter ? "all" : s.filter)} style={{
-            background: filterStatus === s.filter ? s.bg : "#fff",
-            borderRadius: 14, padding: "14px 20px", minWidth: 95,
-            border: `1.5px solid ${filterStatus === s.filter ? s.color : "#cce6f0"}`,
-            cursor: "pointer", transition: "all 0.2s",
-          }}>
+          <div 
+            key={s.label} 
+            onClick={() => setFilterStatus(filterStatus === s.filter ? "all" : s.filter)} 
+            style={{
+              background: filterStatus === s.filter ? s.bg : "#fff",
+              borderRadius: 14, 
+              padding: "14px 20px", 
+              minWidth: 95,
+              border: `1.5px solid ${filterStatus === s.filter ? s.color : "#cce6f0"}`,
+              cursor: "pointer", 
+              transition: "all 0.2s",
+            }}
+          >
             <div style={{ fontSize: 24, fontWeight: 800, color: s.color }}>{s.value}</div>
             <div style={{ fontSize: 12, color: "#6B7280" }}>{s.label}</div>
           </div>
@@ -213,15 +286,30 @@ export default function UserRiwayat() {
         <div style={{ background: "#fff", borderRadius: 20, padding: 80, textAlign: "center", boxShadow: "0 4px 24px rgba(0,150,199,0.08)" }}>
           <div style={{ fontSize: 80, marginBottom: 16 }}>📭</div>
           <h3 style={{ color: "#0D3040" }}>Belum Ada Pengajuan</h3>
-          <p style={{ color: "#7ab3c4", margin: "16px 0 24px" }}>Kamu belum punya pengajuan {filterStatus !== "all" ? `dengan status "${filterStatus}"` : ""}</p>
-          <button onClick={() => navigate("/user")} style={{ padding: "14px 32px", background: "linear-gradient(135deg, #0077A8, #0096C7)", color: "#fff", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 700 }}>+ Ajukan Barang Baru</button>
+          <p style={{ color: "#7ab3c4", margin: "16px 0 24px" }}>
+            Kamu belum punya pengajuan {filterStatus !== "all" ? `dengan status "${filterStatus}"` : ""}
+          </p>
+          <button 
+            onClick={() => navigate("/user")} 
+            style={{ 
+              padding: "14px 32px", 
+              background: "linear-gradient(135deg, #0077A8, #0096C7)", 
+              color: "#fff", 
+              border: "none", 
+              borderRadius: 14, 
+              fontSize: 15, 
+              fontWeight: 700 
+            }}
+          >
+            + Ajukan Barang Baru
+          </button>
         </div>
       ) : (
         <>
           {/* DESKTOP VIEW */}
           <div className="desktop-list">
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {filtered.map((item, i) => {
+              {filtered.map((item) => {
                 const sc = getStatusConfig(item.status);
                 const uc = urgencyConfig[item.urgency] || urgencyConfig.standart;
                 const isOpen = openHistory === item.id;
@@ -233,7 +321,9 @@ export default function UserRiwayat() {
                     boxShadow: "0 4px 20px rgba(0,150,199,0.08)", border: "1px solid #d4eef8"
                   }}>
                     <div style={{ display: "flex", gap: 18 }}>
-                      <div style={{ width: 52, height: 52, borderRadius: 14, flexShrink: 0, background: sc.bg, border: `2px solid ${sc.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>{sc.icon}</div>
+                      <div style={{ width: 52, height: 52, borderRadius: 14, flexShrink: 0, background: sc.bg, border: `2px solid ${sc.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>
+                        {sc.icon}
+                      </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                           <h4 style={{ margin: 0, fontSize: 16.5, fontWeight: 700, color: "#0D3040" }}>{item.title}</h4>
@@ -255,11 +345,19 @@ export default function UserRiwayat() {
 
                           {isPending && (
                             <button 
-                              onClick={() => setConfirmCancel(item)} 
+                              onClick={() => openCancelModal(item)}
                               disabled={cancelling === item.id}
-                              style={{ padding: "8px 18px", fontSize: 13.5, fontWeight: 600, background: "#FFF1F2", color: "#EF4444", border: "1px solid #FECACA", borderRadius: 10 }}
+                              style={{ 
+                                padding: "8px 18px", 
+                                fontSize: 13.5, 
+                                fontWeight: 600, 
+                                background: "#FFF1F2", 
+                                color: "#EF4444", 
+                                border: "1px solid #FECACA", 
+                                borderRadius: 10 
+                              }}
                             >
-                              Batalkan
+                              {cancelling === item.id ? "Membatalkan..." : "Batalkan"}
                             </button>
                           )}
                         </div>
@@ -273,7 +371,7 @@ export default function UserRiwayat() {
             </div>
           </div>
 
-          {/* MOBILE VIEW - Sekarang pasti kelihatan */}
+          {/* MOBILE VIEW */}
           <div className="mobile-list">
             {filtered.map(item => {
               const sc = getStatusConfig(item.status);
@@ -302,17 +400,26 @@ export default function UserRiwayat() {
 
                       <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
                         <button 
-                          onClick={() => setOpenHistory(isOpen ? null : item.id)} 
+                          onClick={() => setOpenHistory(isOpen ? null : item.id)}
                           style={{ flex: 1, padding: "9px", fontSize: 13.5, fontWeight: 600, background: "#EBF6FA", border: "1px solid #a0d4e8", borderRadius: 10 }}
                         >
                           {isOpen ? "Tutup Riwayat" : "Lihat Riwayat"}
                         </button>
                         {isPending && (
                           <button 
-                            onClick={() => setConfirmCancel(item)} 
-                            style={{ padding: "9px 18px", fontSize: 13.5, fontWeight: 600, background: "#FFF1F2", color: "#EF4444", border: "1px solid #FECACA", borderRadius: 10 }}
+                            onClick={() => openCancelModal(item)}
+                            disabled={cancelling === item.id}
+                            style={{ 
+                              padding: "9px 18px", 
+                              fontSize: 13.5, 
+                              fontWeight: 600, 
+                              background: "#FFF1F2", 
+                              color: "#EF4444", 
+                              border: "1px solid #FECACA", 
+                              borderRadius: 10 
+                            }}
                           >
-                            Batalkan
+                            {cancelling === item.id ? "Membatalkan..." : "Batalkan"}
                           </button>
                         )}
                       </div>
@@ -327,13 +434,16 @@ export default function UserRiwayat() {
         </>
       )}
 
-      <ConfirmModal
-        show={!!confirmCancel}
-        title="Batalkan Pengajuan?"
-        message={`Pengajuan yang dibatalkan tidak bisa diaktifkan kembali.`}
+      {/* Modal Pembatalan dengan Alasan Wajib */}
+      <CancelSubmissionModal 
+        show={showCancelModal}
+        submission={selectedToCancel}
         onConfirm={handleCancel}
-        onCancel={() => setConfirmCancel(null)}
-        confirmLabel="Ya, Batalkan"
+        onCancel={() => {
+          setShowCancelModal(false);
+          setSelectedToCancel(null);
+        }}
+        loading={!!cancelling}
       />
     </div>
   );

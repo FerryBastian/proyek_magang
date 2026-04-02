@@ -25,6 +25,8 @@ class Submission extends Model
         'referensi_link',
         'referensi_gambar',
         'status',
+        'cancel_reason',
+        'cancelled_at',
         'cancelled_by',
     ];
 
