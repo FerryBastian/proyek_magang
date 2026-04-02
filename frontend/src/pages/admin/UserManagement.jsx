@@ -61,12 +61,33 @@ export default function UserManagement() {
     } finally { setUpdating(null); }
   };
 
+  // Filter & Sorting (Admin selalu di paling atas)
   const activeUsers = users.filter(u => !u.deleted_at);
   const deletedUsers = users.filter(u => u.deleted_at);
-  const displayed = (showDeleted ? deletedUsers : activeUsers).filter(u =>
+
+  let filteredUsers = (showDeleted ? deletedUsers : activeUsers).filter(u =>
     u.name?.toLowerCase().includes(search.toLowerCase()) ||
     u.email?.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Sorting Logic
+  const rolePriority = { admin: 0, user: 1 };
+  filteredUsers.sort((a, b) => {
+    if (showDeleted) {
+      // Deleted users: yang paling baru dihapus di paling atas
+      return new Date(b.deleted_at) - new Date(a.deleted_at);
+    }
+
+    // Active users: Admin di paling atas, kemudian User
+    if (rolePriority[a.role] !== rolePriority[b.role]) {
+      return rolePriority[a.role] - rolePriority[b.role];
+    }
+
+    // Jika role sama, urutkan berdasarkan nama A-Z
+    return (a.name || "").localeCompare(b.name || "");
+  });
+
+  const displayed = filteredUsers;
 
   const stats = {
     total: activeUsers.length,
@@ -137,12 +158,30 @@ export default function UserManagement() {
         <div className="toolbar" style={{ padding: "16px 24px", borderBottom: "1px solid #F3F4F6", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <div className="search-wrapper" style={{ position: "relative", flex: 1, minWidth: 200 }}>
             <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", fontSize: 18, color: "#9CA3AF" }}>🔍</span>
-            <input type="text" placeholder="Cari nama atau email..." value={search} onChange={e => setSearch(e.target.value)}
-              style={{ width: "100%", padding: "12px 16px 12px 52px", border: "2px solid #E9E8FF", borderRadius: 12, fontSize: 14, color: "#1E1B4B", background: "#FAFAFE", fontFamily: "'Sora', sans-serif" }} />
+            <input 
+              type="text" 
+              placeholder="Cari nama atau email..." 
+              value={search} 
+              onChange={e => setSearch(e.target.value)}
+              style={{ width: "100%", padding: "12px 16px 12px 52px", border: "2px solid #E9E8FF", borderRadius: 12, fontSize: 14, color: "#1E1B4B", background: "#FAFAFE", fontFamily: "'Sora', sans-serif" }} 
+            />
           </div>
 
-          <button onClick={() => setShowDeleted(!showDeleted)}
-            style={{ padding: "12px 20px", borderRadius: 12, fontSize: 13, fontWeight: 600, border: `2px solid ${showDeleted ? "#EF4444" : "#E9E8FF"}`, background: showDeleted ? "#FFF1F2" : "#FAFAFE", color: showDeleted ? "#EF4444" : "#6B7280", cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap" }}>
+          <button 
+            onClick={() => setShowDeleted(!showDeleted)}
+            style={{ 
+              padding: "12px 20px", 
+              borderRadius: 12, 
+              fontSize: 13, 
+              fontWeight: 600, 
+              border: `2px solid ${showDeleted ? "#EF4444" : "#E9E8FF"}`, 
+              background: showDeleted ? "#FFF1F2" : "#FAFAFE", 
+              color: showDeleted ? "#EF4444" : "#6B7280", 
+              cursor: "pointer", 
+              transition: "all 0.2s", 
+              whiteSpace: "nowrap" 
+            }}
+          >
             {showDeleted ? "👥 Tampilkan Aktif" : `🗑️ Tampilkan Dihapus (${stats.deleted})`}
           </button>
         </div>
@@ -156,7 +195,7 @@ export default function UserManagement() {
           </div>
         ) : (
           <>
-            {/* ==================== DESKTOP TABLE (tampilan asli yang kamu suka) ==================== */}
+            {/* ==================== DESKTOP TABLE ==================== */}
             <div className="desktop-table">
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>

@@ -5,10 +5,10 @@ import { AlertModal } from "../../components/Modals";
 
 function getStatusBadge(status) {
   const cfg = {
-    pending:  { bg: "#FFF8E7", border: "#F59E0B", text: "#B45309", label: "Pending" },
+    pending: { bg: "#FFF8E7", border: "#F59E0B", text: "#B45309", label: "Pending" },
     approved: { bg: "#F0FDF4", border: "#22C55E", text: "#15803D", label: "Approved" },
-    rejected:  { bg: "#FFF1F2", border: "#F43F5E", text: "#BE123C", label: "Rejected" },
-    review:    { bg: "#EFF6FF", border: "#3B82F6", text: "#1D4ED8", label: "In Review" },
+    rejected: { bg: "#FFF1F2", border: "#F43F5E", text: "#BE123C", label: "Rejected" },
+    review: { bg: "#EFF6FF", border: "#3B82F6", text: "#1D4ED8", label: "In Review" },
     cancelled: { bg: "#F3F4F6", border: "#9CA3AF", text: "#6B7280", label: "Cancelled" },
   };
   const c = cfg[status?.toLowerCase()] || cfg.pending;
@@ -21,8 +21,8 @@ function getStatusBadge(status) {
 
 function getUrgencyBadge(urgency) {
   const cfg = {
-    standart:  { color: "#22C55E", label: "Standart" },
-    urgent:    { color: "#F59E0B", label: "Urgent" },
+    standart: { color: "#22C55E", label: "Standart" },
+    urgent: { color: "#F59E0B", label: "Urgent" },
     emergency: { color: "#EF4444", label: "Emergency" },
   };
   const c = cfg[urgency?.toLowerCase()] || cfg.standart;
@@ -34,16 +34,17 @@ function getUrgencyBadge(urgency) {
 }
 
 export default function AdminSubmissions() {
-  const location    = useLocation();
+  const location = useLocation();
   const queryStatus = new URLSearchParams(location.search).get("status") || "all";
 
-  const [data, setData]               = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [updatingId, setUpdatingId]   = useState(null);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [statusFilter, setStatusFilter] = useState(queryStatus);
-  const [search, setSearch]           = useState("");
-  const [alertMsg, setAlertMsg]       = useState("");
+  const [search, setSearch] = useState("");
+  const [alertMsg, setAlertMsg] = useState("");
+  const backendUrl = import.meta.env.VITE_BACKEND_APP_URL || 'http://localhost:8000';
 
   useEffect(() => { setStatusFilter(queryStatus); }, [queryStatus]);
 
@@ -198,12 +199,27 @@ export default function AdminSubmissions() {
               {selectedItem.content && <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}><p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Keterangan Tambahan</p><p style={{ margin: 0, fontSize: 13, color: "#0D3040" }}>{selectedItem.content}</p></div>}
               {selectedItem.referensi_link && <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}><p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Referensi Link</p><a href={selectedItem.referensi_link} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "#0096C7", wordBreak: "break-all" }}>{selectedItem.referensi_link}</a></div>}
 
-              {selectedItem.referensi_gambar && (
+              {selectedItem.referensi_gambar && typeof selectedItem.referensi_gambar === 'string' && (
                 <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 16 }}>
                   <p style={{ margin: "0 0 8px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Referensi Gambar</p>
-                  {selectedItem.referensi_gambar.match(/\.(jpg|jpeg|png)$/i)
-                    ? <img src={`${backendUrl}/storage/${selectedItem.referensi_gambar}`} alt="Referensi" style={{ maxWidth: "100%", borderRadius: 8 }} />
-                    : <a href={`${backendUrl}/storage/${selectedItem.referensi_gambar}`} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "#0096C7" }}>📄 Lihat File</a>}
+
+                  {selectedItem.referensi_gambar.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                    <img
+                      src={`${backendUrl}/storage/${selectedItem.referensi_gambar}`}
+                      alt="Referensi"
+                      style={{ maxWidth: "100%", borderRadius: 8 }}
+                      onError={(e) => { e.target.style.display = 'none'; }} // hide kalau gambar error
+                    />
+                  ) : (
+                    <a
+                      href={`${backendUrl}/storage/${selectedItem.referensi_gambar}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ fontSize: 13, color: "#0096C7" }}
+                    >
+                      📄 Lihat File
+                    </a>
+                  )}
                 </div>
               )}
 
@@ -232,16 +248,16 @@ export default function AdminSubmissions() {
       <div className="fade-in filters" style={{ padding: "16px 20px", borderBottom: "1px solid #e8f4fa", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", background: "#fff", borderRadius: 20, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #cce6f0", marginBottom: 20 }}>
         <div className="search-wrapper" style={{ position: "relative", flex: 1, minWidth: 200 }}>
           <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", fontSize: 19, color: "#9CA3AF" }}>🔍</span>
-          <input 
-            type="text" 
-            placeholder="Cari nama barang atau pengaju..." 
-            value={search} 
+          <input
+            type="text"
+            placeholder="Cari nama barang atau pengaju..."
+            value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ width: "100%", padding: "12px 16px 12px 52px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, color: "#0D3040", background: "#f5fbfd", fontFamily: "'Barlow', sans-serif", outline: "none" }} 
+            style={{ width: "100%", padding: "12px 16px 12px 52px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, color: "#0D3040", background: "#f5fbfd", fontFamily: "'Barlow', sans-serif", outline: "none" }}
           />
         </div>
-        <select 
-          value={statusFilter} 
+        <select
+          value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
           style={{ padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, color: "#0D3040", background: "#f5fbfd", cursor: "pointer", fontFamily: "'Barlow', sans-serif", outline: "none", minWidth: 160 }}
         >

@@ -65,7 +65,7 @@ export default function UserSubmit() {
       if (referensiGambar) formData.append("referensi_gambar", referensiGambar);
 
       await API.post("/submit", formData, { headers: { "Content-Type": "multipart/form-data" } });
-      
+
       resetForm();
       setSuccessMsg("✅ Pengajuan berhasil dikirim! Notifikasi WhatsApp telah dikirim ke admin.");
       setTimeout(() => navigate("/user/riwayat"), 1500);
@@ -91,7 +91,7 @@ export default function UserSubmit() {
     return "Selamat malam";
   };
 
-  const displayAvatar = (dashboardData?.name || dashboardData?.user?.name || name || "User")[0]?.toUpperCase() || "👤";
+  const displayAvatar = "😊";
 
   return (
     <div style={{ fontFamily: "'Barlow', sans-serif" }}>
@@ -152,7 +152,19 @@ export default function UserSubmit() {
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, color: "#fff", fontWeight: 700 }}>
+            <div style={{
+              width: 52,
+              height: 52,
+              borderRadius: "50%",
+              background: "rgba(255, 255, 255, 0.15)",
+              border: "2px solid rgba(255, 255, 255, 0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 27,
+              color: "#fff",
+              boxShadow: "0 3px 10px rgba(0, 0, 0, 0.1)"
+            }}>
               {displayAvatar}
             </div>
             <div>
@@ -164,8 +176,8 @@ export default function UserSubmit() {
               </h2>
             </div>
           </div>
-          <button 
-            onClick={() => navigate("/user/riwayat")} 
+          <button
+            onClick={() => navigate("/user/riwayat")}
             style={{ padding: "10px 20px", borderRadius: 12, fontSize: 13, fontWeight: 600, background: "rgba(255,255,255,0.2)", color: "#fff", border: "1px solid rgba(255,255,255,0.3)", cursor: "pointer" }}
           >
             📋 Riwayat
@@ -209,7 +221,7 @@ export default function UserSubmit() {
             {/* Nama Barang */}
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Nama Barang <span style={{ color: "#EF4444" }}>*</span></label>
-              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Contoh: Laptop Dell Inspiron 15..." required 
+              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Contoh: Laptop Dell Inspiron 15..." required
                 style={{ width: "100%", padding: "12px 14px", border: title ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
             </div>
 
@@ -217,7 +229,7 @@ export default function UserSubmit() {
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Jumlah & Satuan <span style={{ color: "#EF4444" }}>*</span></label>
               <div style={{ display: "flex", gap: 8 }}>
-                <input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="0" min="1" required 
+                <input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="0" min="1" required
                   style={{ flex: 1, padding: "12px 14px", border: quantity ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
                 <select value={unit} onChange={e => setUnit(e.target.value)} style={{ padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }}>
                   {["pcs", "unit", "box", "lusin", "rim", "kg", "liter", "set", "buah", "meter", "roll"].map(u => <option key={u} value={u}>{u}</option>)}
@@ -228,13 +240,13 @@ export default function UserSubmit() {
             {/* PIC & Telepon */}
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>PIC (Penanggung Jawab) <span style={{ color: "#EF4444" }}>*</span></label>
-              <input type="text" value={pic} onChange={e => setPic(e.target.value)} placeholder="Nama penanggung jawab" required 
+              <input type="text" value={pic} onChange={e => setPic(e.target.value)} placeholder="Nama penanggung jawab" required
                 style={{ width: "100%", padding: "12px 14px", border: pic ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
             </div>
 
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Nomor Telepon</label>
-              <input type="tel" value={nomorTelepon} onChange={e => setNomorTelepon(e.target.value)} placeholder="08123456789" 
+              <input type="tel" value={nomorTelepon} onChange={e => setNomorTelepon(e.target.value)} placeholder="08123456789"
                 style={{ width: "100%", padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
             </div>
 
@@ -277,7 +289,7 @@ export default function UserSubmit() {
             {/* Referensi Link & Gambar */}
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Referensi Link</label>
-              <input type="url" value={referensiLink} onChange={e => setReferensiLink(e.target.value)} placeholder="https://..." 
+              <input type="url" value={referensiLink} onChange={e => setReferensiLink(e.target.value)} placeholder="https://..."
                 style={{ width: "100%", padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
             </div>
 
@@ -297,8 +309,8 @@ export default function UserSubmit() {
 
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isSubmitting || !title || !kegunaan || !quantity || !pic}
             style={{
               width: "100%", padding: "16px", marginTop: 24,
