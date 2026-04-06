@@ -11,4 +11,4 @@ go-whatsapp-web-multidevice/.env
 
 # Umum
 *.log
-.DS_Store
+.DS_Storesocket-server/node_modules/
