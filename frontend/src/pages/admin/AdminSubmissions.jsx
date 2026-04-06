@@ -167,10 +167,21 @@ export default function AdminSubmissions() {
         .submission-card .title {
           font-size: 15px;
           font-weight: 700;
-          color: "#0D3040";
+          color: #0D3040;
           margin: 10px 0 8px;
           line-height: 1.3;
         }
+
+        .ref-img {
+          width: 100%;
+          border-radius: 10px;
+          max-height: 300px;
+          object-fit: contain;
+          border: 1px solid #cce6f0;
+          cursor: pointer;
+          transition: opacity 0.2s;
+        }
+        .ref-img:hover { opacity: 0.85; }
       `}</style>
 
       <div className="fade-in header-section">
@@ -180,7 +191,7 @@ export default function AdminSubmissions() {
 
       <AlertModal show={!!alertMsg} message={alertMsg} onClose={() => setAlertMsg("")} />
 
-      {/* ==================== MODAL DETAIL PENGajuan ==================== */}
+      {/* ==================== MODAL DETAIL ==================== */}
       {selectedItem && (
         <div
           className="lm-backdrop"
@@ -260,19 +271,23 @@ export default function AdminSubmissions() {
                 })}
               </div>
 
-              {/* Kegunaan, Spesifikasi, dll */}
+              {/* Kegunaan */}
               {selectedItem.kegunaan && (
                 <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}>
                   <p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Kegunaan</p>
                   <p style={{ margin: 0, fontSize: 13, color: "#0D3040" }}>{selectedItem.kegunaan}</p>
                 </div>
               )}
+
+              {/* Spesifikasi */}
               {selectedItem.spesifikasi && (
                 <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}>
                   <p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Spesifikasi</p>
                   <p style={{ margin: 0, fontSize: 13, color: "#0D3040" }}>{selectedItem.spesifikasi}</p>
                 </div>
               )}
+
+              {/* Keterangan Tambahan */}
               {selectedItem.content && (
                 <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}>
                   <p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Keterangan Tambahan</p>
@@ -280,7 +295,80 @@ export default function AdminSubmissions() {
                 </div>
               )}
 
-              {/* ==================== ALASAN PEMBATALAN ==================== */}
+              {/* Referensi Link */}
+              {selectedItem.referensi_link && (
+                <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}>
+                  <p style={{ margin: "0 0 4px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Referensi Link</p>
+                  <a
+                    href={selectedItem.referensi_link}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontSize: 13, fontWeight: 600, color: "#0096C7", textDecoration: "none", wordBreak: "break-all" }}
+                  >
+                    🔗 {selectedItem.referensi_link}
+                  </a>
+                </div>
+              )}
+
+              {/* Referensi Gambar */}
+              {selectedItem.referensi_gambar && (
+                <div style={{ background: "#f5fbfd", borderRadius: 12, padding: 12, border: "1px solid #e8f4fa", marginBottom: 12 }}>
+                  <p style={{ margin: "0 0 8px", fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Referensi Gambar</p>
+                  {selectedItem.referensi_gambar.endsWith('.pdf') ? (
+                    <a
+                      href={`${backendUrl}/storage/${selectedItem.referensi_gambar}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "10px 16px",
+                        background: "#EBF6FA",
+                        border: "1px solid #cce6f0",
+                        borderRadius: 10,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: "#0096C7",
+                        textDecoration: "none"
+                      }}
+                    >
+                      📄 Lihat PDF Referensi
+                    </a>
+                  ) : (
+                    <a
+                      href={`${backendUrl}/storage/${selectedItem.referensi_gambar}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <img
+                        className="ref-img"
+                        src={`${backendUrl}/storage/${selectedItem.referensi_gambar}`}
+                        alt="Referensi Gambar"
+                        onError={e => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div style={{
+                        display: 'none',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 20,
+                        background: '#FFF1F2',
+                        borderRadius: 10,
+                        color: '#EF4444',
+                        fontSize: 13,
+                        gap: 8
+                      }}>
+                        ⚠️ Gambar tidak dapat dimuat
+                      </div>
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Alasan Pembatalan */}
               {selectedItem.status?.toLowerCase() === "cancelled" && selectedItem.cancel_reason && (
                 <div style={{
                   background: "#FFF1F2",
@@ -310,24 +398,16 @@ export default function AdminSubmissions() {
                     "{selectedItem.cancel_reason}"
                   </p>
                   {selectedItem.cancelled_at && (
-                    <p style={{
-                      margin: "12px 0 0 0",
-                      fontSize: 12.5,
-                      color: "#9CA3AF"
-                    }}>
+                    <p style={{ margin: "12px 0 0 0", fontSize: 12.5, color: "#9CA3AF" }}>
                       Dibatalkan pada: {new Date(selectedItem.cancelled_at).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit"
+                        day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit"
                       })}
                     </p>
                   )}
                 </div>
               )}
 
-              {/* Update Status Section */}
+              {/* Update Status */}
               <div style={{ background: "#EBF6FA", borderRadius: 12, padding: 16, border: "1px solid #cce6f0" }}>
                 <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 600, color: "#0077A8" }}>Update Status</p>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -480,13 +560,19 @@ export default function AdminSubmissions() {
                           </div>
                         </div>
                       </td>
-                      <td style={{ padding: "12px 16px" }}><p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#0D3040", maxWidth: 160, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</p></td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#0D3040", maxWidth: 160, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</p>
+                      </td>
                       <td style={{ padding: "12px 16px" }}><p style={{ margin: 0, fontSize: 13, color: "#0D3040" }}>{item.quantity} {item.unit}</p></td>
                       <td style={{ padding: "12px 16px" }}><p style={{ margin: 0, fontSize: 13, color: "#6B7280" }}>{item.workshop?.name || "-"}</p></td>
                       <td style={{ padding: "12px 16px" }}><p style={{ margin: 0, fontSize: 13, color: "#6B7280" }}>{item.division?.name || "-"}</p></td>
                       <td style={{ padding: "12px 16px" }}>{getStatusBadge(item.status)}</td>
                       <td style={{ padding: "12px 16px" }}>{getUrgencyBadge(item.urgency)}</td>
-                      <td style={{ padding: "12px 16px" }}><p style={{ margin: 0, fontSize: 12, color: "#9CA3AF", whiteSpace: "nowrap" }}>{new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</p></td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <p style={{ margin: 0, fontSize: 12, color: "#9CA3AF", whiteSpace: "nowrap" }}>
+                          {new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                        </p>
+                      </td>
                       <td style={{ padding: "12px 16px" }} onClick={e => e.stopPropagation()}>
                         {updatingId === item.id ? (
                           <svg className="spin" style={{ width: 18, height: 18, color: "#0096C7" }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -494,9 +580,23 @@ export default function AdminSubmissions() {
                             <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                           </svg>
                         ) : (
-                          <select value={item.status} onChange={e => handleStatusChange(item.id, e.target.value)}
+                          <select
+                            value={item.status}
+                            onChange={e => handleStatusChange(item.id, e.target.value)}
                             disabled={item.status === "cancelled"}
-                            style={{ padding: "6px 10px", border: "1.5px solid #cce6f0", borderRadius: 8, fontSize: 12, color: "#0D3040", background: item.status === "cancelled" ? "#F3F4F6" : "#f5fbfd", cursor: item.status === "cancelled" ? "not-allowed" : "pointer", fontFamily: "'Barlow', sans-serif", outline: "none", opacity: item.status === "cancelled" ? 0.6 : 1 }}>
+                            style={{
+                              padding: "6px 10px",
+                              border: "1.5px solid #cce6f0",
+                              borderRadius: 8,
+                              fontSize: 12,
+                              color: "#0D3040",
+                              background: item.status === "cancelled" ? "#F3F4F6" : "#f5fbfd",
+                              cursor: item.status === "cancelled" ? "not-allowed" : "pointer",
+                              fontFamily: "'Barlow', sans-serif",
+                              outline: "none",
+                              opacity: item.status === "cancelled" ? 0.6 : 1
+                            }}
+                          >
                             <option value="pending">Pending</option>
                             <option value="review">In Review</option>
                             <option value="approved">Approved</option>

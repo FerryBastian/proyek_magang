@@ -28,7 +28,7 @@ class SubmissionController extends Controller
             'pic' => 'required|string|max:255',
             'nomor_telepon' => 'nullable|string|max:20',
             'referensi_link' => 'nullable|url',
-            'referensi_gambar' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'referensi_gambar' => 'nullable|file|max:10240',
         ]);
 
         $user = $request->user();
@@ -52,8 +52,19 @@ class SubmissionController extends Controller
             ];
 
             if ($request->hasFile('referensi_gambar')) {
-                $path = $request->file('referensi_gambar')->store('referensi', 'public');
-                $data['referensi_gambar'] = $path;
+                $file = $request->file('referensi_gambar');
+                $ext = strtolower($file->getClientOriginalExtension());
+                
+                if (!in_array($ext, ['jpg', 'jpeg', 'png', 'pdf'])) {
+                    return response()->json([
+                        'message'=> 'Format file tidak didukung.',
+                        'errors' => ['referensi_gambar' => ['Gunakan jpg, jpeg, png, atau pdf.']]
+                    ], 422);
+                }
+                
+                $filename = uniqid('ref_') . '.' . $ext;
+                $file->move(storage_path('app/public/referensi'), $filename);
+                $data['referensi_gambar'] = 'referensi/' . $filename;
             }
 
             return Submission::create($data);

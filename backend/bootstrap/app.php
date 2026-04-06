@@ -11,11 +11,22 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
+    ->withMiddleware(function (Middleware $middleware) {
+
+        // CORS — harus paling atas agar handle OPTIONS sebelum middleware lain
+        $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
+
+        // Exclude CSRF untuk API routes
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+            'api/v1/*',
+            'auth/*',
+        ]);
+
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class, // âœ… tambah namespace lengkap
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

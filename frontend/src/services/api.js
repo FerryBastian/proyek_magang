@@ -68,11 +68,11 @@ export const authApi = {
 
   // Google OAuth login
   async loginWithGoogle({ id_token, device_name = "react-app" }) {
-    await getCsrfCookie();
+    // Tidak perlu CSRF cookie — endpoint ini pakai token, bukan session
     const res = await API.post("/oauth/google", { id_token, device_name });
     if (res?.data?.token) {
-      API.defaults.headers.common.Authorization = `Bearer ${res.data.token}`;
-      localStorage.setItem("auth_token", res.data.token);
+        API.defaults.headers.common.Authorization = `Bearer ${res.data.token}`;
+        localStorage.setItem("auth_token", res.data.token);
     }
     return res;
   },

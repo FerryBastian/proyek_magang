@@ -29,34 +29,23 @@ Route::prefix('v1')->name('v1.')->group(function () {
             return response()->json(['user' => $request->user()]);
         })->name('auth.me');
 
-        // Submissions
         Route::post('/submit', [SubmissionController::class, 'store'])->name('submissions.store');
         Route::get('/my-submissions', [SubmissionController::class, 'mySubmissions'])->name('submissions.mine');
         Route::patch('/submissions/{submission}/cancel', [SubmissionController::class, 'cancel'])->name('submissions.cancel');
 
-        // ADMIN ROUTES
         Route::middleware('role:admin')->group(function () {
-
             Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-
-            // Users
             Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users.index');
             Route::patch('/admin/users/{user}/role', [AdminController::class, 'updateRole'])->name('admin.users.role');
             Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
             Route::patch('/admin/users/{id}/restore', [AdminController::class, 'restoreUser'])->name('admin.users.restore');
-
-            // Submissions
             Route::get('/admin/submissions', [AdminController::class, 'submissions'])->name('admin.submissions.index');
             Route::patch('/admin/submissions/{submission}/status', [AdminController::class, 'updateStatus'])->name('admin.submissions.status');
-
-            // Workshop CRUD
             Route::get('/admin/workshops', [WorkshopController::class, 'adminIndex'])->name('admin.workshops.index');
             Route::post('/admin/workshops', [WorkshopController::class, 'store'])->name('admin.workshops.store');
             Route::put('/admin/workshops/{id}', [WorkshopController::class, 'update'])->name('admin.workshops.update');
             Route::delete('/admin/workshops/{id}', [WorkshopController::class, 'destroy'])->name('admin.workshops.destroy');
             Route::patch('/admin/workshops/{id}/restore', [WorkshopController::class, 'restore'])->name('admin.workshops.restore');
-
-            // Division CRUD
             Route::get('/admin/divisions', [DivisionController::class, 'adminIndex'])->name('admin.divisions.index');
             Route::post('/admin/divisions', [DivisionController::class, 'store'])->name('admin.divisions.store');
             Route::put('/admin/divisions/{id}', [DivisionController::class, 'update'])->name('admin.divisions.update');

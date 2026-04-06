@@ -42,10 +42,15 @@ return [
     ],
 
     'gowa' => [
-        'url' => env('GOWA_URL'),
+        'url' => env('GOWA_URL', 'http://127.0.0.1:3000'),
         'admin_phone' => env('GOWA_ADMIN_PHONE'),
         'device_id' => env('GOWA_DEVICE_ID'),
         'username' => env('GOWA_USERNAME'),
         'password' => env('GOWA_PASSWORD'),
     ],
+
+'socket' => [
+    'url' => env('SOCKET_URL', 'http://127.0.0.1:3001'),
+],
+
 ];
