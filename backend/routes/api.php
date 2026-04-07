@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\SubmissionController;
 use App\Http\Controllers\Api\WorkshopController;
 use App\Http\Controllers\Api\DivisionController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\ProfileController;
+use App\Models\UserProfile;
 use App\Models\Submission;
 use App\Models\User;
 
