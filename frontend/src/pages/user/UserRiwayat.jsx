@@ -6,6 +6,22 @@ import { useNavigate } from "react-router-dom";
 import socket from "../../services/socket";
 import { SuccessBanner, CancelSubmissionModal } from "../../components/Modals";
 
+// Helper: build reorder state from a submission item
+const buildReorderState = (item) => ({
+  workshopId:    item.workshop?.id  || item.workshop_id  || "",
+  divisionId:    item.division?.id  || item.division_id  || "",
+  title:         item.title         || "",
+  quantity:      item.quantity      || "",
+  unit:          item.unit          || "pcs",
+  spesifikasi:   item.spesifikasi   || "",
+  kegunaan:      item.kegunaan      || "",
+  content:       item.content       || "",
+  urgency:       item.urgency       || "standart",
+  pic:           item.pic           || "",
+  nomorTelepon:  item.nomor_telepon || "",
+  referensiLink: item.referensi_link|| "",
+});
+
 export default function UserRiwayat() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -49,6 +65,11 @@ export default function UserRiwayat() {
   const openCancelModal = (item) => {
     setSelectedToCancel(item);
     setShowCancelModal(true);
+  };
+
+  // Fungsi handle reorder — navigasi ke halaman submit dengan data prefill
+  const handleReorder = (item) => {
+    navigate("/user", { state: { reorder: buildReorderState(item) } });
   };
 
   // Fungsi handle cancel dengan alasan (wajib)
@@ -191,6 +212,28 @@ export default function UserRiwayat() {
     );
   };
 
+  // Shared button styles
+  const btnReorder = {
+    padding: "8px 18px",
+    fontSize: 13.5,
+    fontWeight: 600,
+    background: "linear-gradient(135deg, #0077A8, #0096C7)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 10,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    whiteSpace: "nowrap",
+  };
+
+  const btnReorderMobile = {
+    ...btnReorder,
+    padding: "9px 14px",
+    fontSize: 13,
+  };
+
   return (
     <div style={{ fontFamily: "'Barlow', sans-serif" }}>
       <style>{`
@@ -198,6 +241,8 @@ export default function UserRiwayat() {
         .fade-in{animation:fadeIn 0.3s ease forwards}
         .card-hover{transition: all 0.2s ease;}
         .card-hover:hover{transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,150,199,0.15)!important;}
+        .btn-reorder{transition: all 0.2s ease;}
+        .btn-reorder:hover{transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,150,199,0.35)!important;}
 
         .desktop-list { display: block; }
         .mobile-list { display: none; }
@@ -335,13 +380,24 @@ export default function UserRiwayat() {
                           {item.quantity} {item.unit} • {item.workshop?.name || "-"} • {new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
                         </div>
 
-                        <div style={{ marginTop: 14, display: "flex", gap: 10 }}>
+                        <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
                           <button 
                             onClick={() => setOpenHistory(isOpen ? null : item.id)} 
-                            style={{ padding: "8px 18px", fontSize: 13.5, fontWeight: 600, background: "#EBF6FA", border: "1px solid #a0d4e8", borderRadius: 10 }}
+                            style={{ padding: "8px 18px", fontSize: 13.5, fontWeight: 600, background: "#EBF6FA", border: "1px solid #a0d4e8", borderRadius: 10, cursor: "pointer" }}
                           >
                             {isOpen ? "Sembunyikan Riwayat" : "Lihat Riwayat"}
                           </button>
+
+                          {/* Reorder button — tampil untuk semua status kecuali pending */}
+                          {!isPending && (
+                            <button
+                              className="btn-reorder"
+                              onClick={() => handleReorder(item)}
+                              style={btnReorder}
+                            >
+                              🔄 Reorder
+                            </button>
+                          )}
 
                           {isPending && (
                             <button 
@@ -354,7 +410,8 @@ export default function UserRiwayat() {
                                 background: "#FFF1F2", 
                                 color: "#EF4444", 
                                 border: "1px solid #FECACA", 
-                                borderRadius: 10 
+                                borderRadius: 10,
+                                cursor: "pointer",
                               }}
                             >
                               {cancelling === item.id ? "Membatalkan..." : "Batalkan"}
@@ -398,13 +455,25 @@ export default function UserRiwayat() {
                         <span style={{ padding: "3px 10px", borderRadius: 9999, fontSize: 11.5, background: `${uc.color}15`, color: uc.color }}>{uc.icon} {uc.label}</span>
                       </div>
 
-                      <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
+                      <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
                         <button 
                           onClick={() => setOpenHistory(isOpen ? null : item.id)}
-                          style={{ flex: 1, padding: "9px", fontSize: 13.5, fontWeight: 600, background: "#EBF6FA", border: "1px solid #a0d4e8", borderRadius: 10 }}
+                          style={{ flex: 1, minWidth: 120, padding: "9px", fontSize: 13.5, fontWeight: 600, background: "#EBF6FA", border: "1px solid #a0d4e8", borderRadius: 10, cursor: "pointer" }}
                         >
                           {isOpen ? "Tutup Riwayat" : "Lihat Riwayat"}
                         </button>
+
+                        {/* Reorder button mobile */}
+                        {!isPending && (
+                          <button
+                            className="btn-reorder"
+                            onClick={() => handleReorder(item)}
+                            style={btnReorderMobile}
+                          >
+                            🔄 Reorder
+                          </button>
+                        )}
+
                         {isPending && (
                           <button 
                             onClick={() => openCancelModal(item)}
@@ -416,7 +485,8 @@ export default function UserRiwayat() {
                               background: "#FFF1F2", 
                               color: "#EF4444", 
                               border: "1px solid #FECACA", 
-                              borderRadius: 10 
+                              borderRadius: 10,
+                              cursor: "pointer",
                             }}
                           >
                             {cancelling === item.id ? "Membatalkan..." : "Batalkan"}

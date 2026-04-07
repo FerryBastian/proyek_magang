@@ -33,6 +33,9 @@ Route::prefix('v1')->name('v1.')->group(function () {
         Route::get('/my-submissions', [SubmissionController::class, 'mySubmissions'])->name('submissions.mine');
         Route::patch('/submissions/{submission}/cancel', [SubmissionController::class, 'cancel'])->name('submissions.cancel');
 
+        Route::get('/profile', [ProfileController::class, 'show']);
+        Route::put('/profile', [ProfileController::class, 'update']);
+
         Route::middleware('role:admin')->group(function () {
             Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
             Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users.index');

@@ -2,37 +2,53 @@ import { useState, useEffect, useRef } from "react";
 import { userApi } from "../../services/api";
 import API from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { SuccessBanner } from "../../components/Modals";
 
 export default function UserSubmit() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [workshopId, setWorkshopId] = useState("");
-  const [divisionId, setDivisionId] = useState("");
-  const [title, setTitle] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [unit, setUnit] = useState("pcs");
-  const [spesifikasi, setSpesifikasi] = useState("");
-  const [kegunaan, setKegunaan] = useState("");
-  const [content, setContent] = useState("");
-  const [urgency, setUrgency] = useState("standart");
-  const [pic, setPic] = useState("");
-  const [nomorTelepon, setNomorTelepon] = useState("");
-  const [referensiLink, setReferensiLink] = useState("");
+  const reorderData  = location.state?.reorder || null;
+  const savedProfile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+
+  const [workshopId, setWorkshopId]     = useState(reorderData?.workshopId  || savedProfile?.workshopId || "");
+  const [divisionId, setDivisionId]     = useState(reorderData?.divisionId  || savedProfile?.divisionId || "");
+  const [title, setTitle]               = useState(reorderData?.title        || "");
+  const [quantity, setQuantity]         = useState(reorderData?.quantity     || "");
+  const [unit, setUnit]                 = useState(reorderData?.unit         || "pcs");
+  const [spesifikasi, setSpesifikasi]   = useState(reorderData?.spesifikasi  || "");
+  const [kegunaan, setKegunaan]         = useState(reorderData?.kegunaan     || "");
+  const [content, setContent]           = useState(reorderData?.content      || "");
+  const [urgency, setUrgency]           = useState(reorderData?.urgency      || "standart");
+  const [pic, setPic]                   = useState(reorderData?.pic          || "");
+  const [nomorTelepon, setNomorTelepon] = useState(reorderData?.nomorTelepon || savedProfile?.phone || "");
+  const [referensiLink, setReferensiLink] = useState(reorderData?.referensiLink || "");
   const [referensiGambar, setReferensiGambar] = useState(null);
-  const [workshops, setWorkshops] = useState([]);
-  const [divisions, setDivisions] = useState([]);
+
+  const [workshops, setWorkshops]         = useState([]);
+  const [divisions, setDivisions]         = useState([]);
   const [dashboardData, setDashboardData] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
+  const [isSubmitting, setIsSubmitting]   = useState(false);
+  const [successMsg, setSuccessMsg]       = useState("");
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     userApi.getDashboard().then(res => setDashboardData(res.data)).catch(console.log);
     API.get("/workshops").then(res => setWorkshops(res.data)).catch(console.log);
     API.get("/divisions").then(res => setDivisions(res.data)).catch(console.log);
+
+    if (!reorderData) {
+      API.get("/profile").then(res => {
+        const p = res.data;
+        if (p.workshop_id)   setWorkshopId(String(p.workshop_id));
+        if (p.division_id)   setDivisionId(String(p.division_id));
+        if (p.nomor_telepon) setNomorTelepon(p.nomor_telepon);
+        if (p.workshop_id || p.division_id || p.nomor_telepon) setProfileLoaded(true);
+      }).catch(() => {});
+    }
   }, []);
 
   const resetForm = () => {
@@ -63,9 +79,7 @@ export default function UserSubmit() {
       if (nomorTelepon) formData.append("nomor_telepon", nomorTelepon);
       if (referensiLink) formData.append("referensi_link", referensiLink);
       if (referensiGambar) formData.append("referensi_gambar", referensiGambar);
-
       await API.post("/submit", formData, { headers: { "Content-Type": "multipart/form-data" } });
-
       resetForm();
       setSuccessMsg("✅ Pengajuan berhasil dikirim! Notifikasi WhatsApp telah dikirim ke admin.");
       setTimeout(() => navigate("/user/riwayat"), 1500);
@@ -77,21 +91,18 @@ export default function UserSubmit() {
   };
 
   const urgencyConfig = {
-    standart: { color: "#22C55E", icon: "🟢", label: "Standart", sub: "± 5 Hari (Marketplace)" },
-    urgent: { color: "#F59E0B", icon: "🟠", label: "Urgent", sub: "± 3 Hari (Baraka by Wa)" },
+    standart:  { color: "#22C55E", icon: "🟢", label: "Standart",  sub: "± 5 Hari (Marketplace)" },
+    urgent:    { color: "#F59E0B", icon: "🟠", label: "Urgent",    sub: "± 3 Hari (Baraka by Wa)" },
     emergency: { color: "#EF4444", icon: "🔴", label: "Emergency", sub: "24 Jam (Lokal/Daytrans)" },
   };
 
-  const name = user?.name || "User";
   const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return "Selamat pagi";
-    if (hour >= 12 && hour < 15) return "Selamat siang";
-    if (hour >= 15 && hour < 18) return "Selamat sore";
+    const h = new Date().getHours();
+    if (h >= 5  && h < 12) return "Selamat pagi";
+    if (h >= 12 && h < 15) return "Selamat siang";
+    if (h >= 15 && h < 18) return "Selamat sore";
     return "Selamat malam";
   };
-
-  const displayAvatar = "😊";
 
   return (
     <div style={{ fontFamily: "'Barlow', sans-serif" }}>
@@ -99,51 +110,21 @@ export default function UserSubmit() {
         * { box-sizing: border-box; }
         input, textarea, select { font-family: 'Barlow', sans-serif !important; }
         input:focus, textarea:focus, select:focus { outline: none; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: fadeIn 0.3s ease forwards; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .spin { animation: spin 0.8s linear infinite; }
-
         input::placeholder, textarea::placeholder { color: #a0c4d4; }
-
         .submit-btn { transition: all 0.2s ease; }
         .submit-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,150,199,0.35) !important; }
-
-        /* ==================== MOBILE VIEW ==================== */
         @media (max-width: 768px) {
-          .header-section { 
-            flex-direction: column !important; 
-            text-align: center; 
-            padding: 20px 16px !important; 
-            gap: 16px !important; 
-          }
+          .header-section { flex-direction: column !important; text-align: center; padding: 20px 16px !important; gap: 16px !important; }
           .form-card { padding: 20px 16px !important; }
-          .form-grid { 
-            grid-template-columns: 1fr !important; 
-            gap: 16px !important; 
-          }
-          .urgency-grid { 
-            grid-template-columns: 1fr !important; 
-          }
-          .qty-unit-row { 
-            flex-direction: column !important; 
-            gap: 10px !important; 
-          }
-          .qty-unit-row input, .qty-unit-row select { width: 100% !important; }
-          .file-upload { flex-direction: column !important; text-align: center !important; }
-          .input-icon-wrapper input { padding-left: 14px !important; }
-          .input-icon-wrapper span { display: none !important; }
+          .form-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
         }
-
         @media (max-width: 480px) {
-          .form-card h3 { font-size: 18px !important; }
-          .urgency-option { padding: 12px 14px !important; font-size: 14px !important; }
           .submit-btn { padding: 16px !important; font-size: 16px !important; }
         }
       `}</style>
 
-      {/* Header */}
       {dashboardData && (
         <div className="fade-in header-section" style={{
           background: "linear-gradient(135deg, #0077A8, #0096C7, #00B4D8)",
@@ -152,59 +133,47 @@ export default function UserSubmit() {
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{
-              width: 52,
-              height: 52,
-              borderRadius: "50%",
-              background: "rgba(255, 255, 255, 0.15)",
-              border: "2px solid rgba(255, 255, 255, 0.5)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 27,
-              color: "#fff",
-              boxShadow: "0 3px 10px rgba(0, 0, 0, 0.1)"
-            }}>
-              {displayAvatar}
-            </div>
+            <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 27, color: "#fff" }}>😊</div>
             <div>
-              <p style={{ margin: 0, fontSize: 15, color: "#fff" }}>
-                {getGreeting()}, {name} 👋
-              </p>
-              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#fff" }}>
-                {dashboardData?.name || dashboardData?.user?.name}
-              </h2>
+              <p style={{ margin: 0, fontSize: 15, color: "#fff" }}>{getGreeting()}, {user?.name || "User"} 👋</p>
+              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#fff" }}>{dashboardData?.name || dashboardData?.user?.name}</h2>
             </div>
           </div>
-          <button
-            onClick={() => navigate("/user/riwayat")}
-            style={{ padding: "10px 20px", borderRadius: 12, fontSize: 13, fontWeight: 600, background: "rgba(255,255,255,0.2)", color: "#fff", border: "1px solid rgba(255,255,255,0.3)", cursor: "pointer" }}
-          >
-            📋 Riwayat
-          </button>
+          <button onClick={() => navigate("/user/riwayat")} style={{ padding: "10px 20px", borderRadius: 12, fontSize: 13, fontWeight: 600, background: "rgba(255,255,255,0.2)", color: "#fff", border: "1px solid rgba(255,255,255,0.3)", cursor: "pointer" }}>📋 Riwayat</button>
         </div>
       )}
 
-      {/* Success Message */}
       <SuccessBanner message={successMsg} onClose={() => setSuccessMsg("")} />
 
-      {/* Form Card */}
+      {profileLoaded && !reorderData && (
+        <div className="fade-in" style={{ background: "#F0FDF4", border: "1.5px solid #86EFAC", borderRadius: 14, padding: "12px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12, fontSize: 13.5, color: "#15803D" }}>
+          <span style={{ fontSize: 18 }}>✨</span>
+          <span>Form telah diisi otomatis berdasarkan <strong>profil kamu</strong>. Kamu tetap bisa mengubahnya.</span>
+        </div>
+      )}
+
+      {reorderData && (
+        <div className="fade-in" style={{ background: "#EFF6FF", border: "1.5px solid #93C5FD", borderRadius: 14, padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12, fontSize: 14, color: "#1D4ED8" }}>
+          <span style={{ fontSize: 20 }}>🔄</span>
+          <div><strong>Mode Reorder</strong> — Form ini diisi otomatis dari pengajuan <strong>"{reorderData.title}"</strong>. Kamu bisa mengubah isinya sebelum mengirim.</div>
+        </div>
+      )}
+
       <div className="fade-in form-card" style={{ background: "#fff", borderRadius: 20, padding: "28px 32px", boxShadow: "0 4px 24px rgba(0,150,199,0.08)", border: "1px solid #d4eef8" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
           <div style={{ width: 44, height: 44, borderRadius: 14, background: "linear-gradient(135deg, #0077A8, #0096C7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#fff" }}>📦</div>
           <div>
-            <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#0D3040" }}>Form Pengadaan Barang</h3>
-            <p style={{ margin: 0, fontSize: 13, color: "#7ab3c4" }}>Isi detail barang yang ingin diajukan</p>
+            <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#0D3040" }}>{reorderData ? "Reorder Barang" : "Form Pengadaan Barang"}</h3>
+            <p style={{ margin: 0, fontSize: 13, color: "#7ab3c4" }}>{reorderData ? "Periksa dan sesuaikan detail sebelum mengirim" : "Isi detail barang yang ingin diajukan"}</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
 
-            {/* Workshop & Divisi */}
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Workshop</label>
-              <select value={workshopId} onChange={e => setWorkshopId(e.target.value)} style={{ width: "100%", padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }}>
+              <select value={workshopId} onChange={e => setWorkshopId(e.target.value)} style={{ width: "100%", padding: "12px 14px", border: workshopId ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: workshopId ? "#f0faff" : "#f5fbfd" }}>
                 <option value="">-- Pilih Workshop --</option>
                 {workshops.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
               </select>
@@ -212,72 +181,57 @@ export default function UserSubmit() {
 
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Divisi</label>
-              <select value={divisionId} onChange={e => setDivisionId(e.target.value)} style={{ width: "100%", padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }}>
+              <select value={divisionId} onChange={e => setDivisionId(e.target.value)} style={{ width: "100%", padding: "12px 14px", border: divisionId ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: divisionId ? "#f0faff" : "#f5fbfd" }}>
                 <option value="">-- Pilih Divisi --</option>
                 {divisions.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
             </div>
 
-            {/* Nama Barang */}
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Nama Barang <span style={{ color: "#EF4444" }}>*</span></label>
-              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Contoh: Laptop Dell Inspiron 15..." required
-                style={{ width: "100%", padding: "12px 14px", border: title ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
+              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Contoh: Laptop Dell Inspiron 15..." required style={{ width: "100%", padding: "12px 14px", border: title ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
             </div>
 
-            {/* Jumlah & Satuan */}
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Jumlah & Satuan <span style={{ color: "#EF4444" }}>*</span></label>
               <div style={{ display: "flex", gap: 8 }}>
-                <input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="0" min="1" required
-                  style={{ flex: 1, padding: "12px 14px", border: quantity ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
+                <input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="0" min="1" required style={{ flex: 1, padding: "12px 14px", border: quantity ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
                 <select value={unit} onChange={e => setUnit(e.target.value)} style={{ padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }}>
-                  {["pcs", "unit", "box", "lusin", "rim", "kg", "liter", "set", "buah", "meter", "roll"].map(u => <option key={u} value={u}>{u}</option>)}
+                  {["pcs","unit","box","lusin","rim","kg","liter","set","buah","meter","roll"].map(u => <option key={u} value={u}>{u}</option>)}
                 </select>
               </div>
             </div>
 
-            {/* PIC & Telepon */}
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>PIC (Penanggung Jawab) <span style={{ color: "#EF4444" }}>*</span></label>
-              <input type="text" value={pic} onChange={e => setPic(e.target.value)} placeholder="Nama penanggung jawab" required
-                style={{ width: "100%", padding: "12px 14px", border: pic ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
+              <input type="text" value={pic} onChange={e => setPic(e.target.value)} placeholder="Nama penanggung jawab" required style={{ width: "100%", padding: "12px 14px", border: pic ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
             </div>
 
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Nomor Telepon</label>
-              <input type="tel" value={nomorTelepon} onChange={e => setNomorTelepon(e.target.value)} placeholder="08123456789"
-                style={{ width: "100%", padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
+              <input type="tel" value={nomorTelepon} onChange={e => setNomorTelepon(e.target.value)} placeholder="08123456789" style={{ width: "100%", padding: "12px 14px", border: nomorTelepon ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: nomorTelepon ? "#f0faff" : "#f5fbfd" }} />
             </div>
 
-            {/* Spesifikasi, Kegunaan, Keterangan */}
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Spesifikasi</label>
-              <textarea value={spesifikasi} onChange={e => setSpesifikasi(e.target.value)} placeholder="Spesifikasi teknis barang..." rows={3}
-                style={{ width: "100%", padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd", resize: "vertical" }} />
+              <textarea value={spesifikasi} onChange={e => setSpesifikasi(e.target.value)} placeholder="Spesifikasi teknis barang..." rows={3} style={{ width: "100%", padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd", resize: "vertical" }} />
             </div>
 
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Kegunaan <span style={{ color: "#EF4444" }}>*</span></label>
-              <textarea value={kegunaan} onChange={e => setKegunaan(e.target.value)} placeholder="Jelaskan untuk apa barang ini digunakan..." required rows={3}
-                style={{ width: "100%", padding: "12px 14px", border: kegunaan ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd", resize: "vertical" }} />
+              <textarea value={kegunaan} onChange={e => setKegunaan(e.target.value)} placeholder="Jelaskan untuk apa barang ini digunakan..." required rows={3} style={{ width: "100%", padding: "12px 14px", border: kegunaan ? "2px solid #0096C7" : "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd", resize: "vertical" }} />
             </div>
 
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Keterangan Tambahan</label>
-              <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Apabila tersedia di toko offline terdekat..." rows={3}
-                style={{ width: "100%", padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd", resize: "vertical" }} />
+              <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Apabila tersedia di toko offline terdekat..." rows={3} style={{ width: "100%", padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd", resize: "vertical" }} />
             </div>
 
-            {/* Urgensi */}
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 12 }}>Urgensi <span style={{ color: "#EF4444" }}>*</span></label>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
                 {Object.entries(urgencyConfig).map(([val, u]) => (
-                  <div key={val} onClick={() => setUrgency(val)} style={{
-                    padding: "14px 16px", borderRadius: 12, cursor: "pointer", border: urgency === val ? `2px solid ${u.color}` : "2px solid #cce6f0",
-                    background: urgency === val ? `${u.color}15` : "#f5fbfd", transition: "all 0.2s",
-                  }}>
+                  <div key={val} onClick={() => setUrgency(val)} style={{ padding: "14px 16px", borderRadius: 12, cursor: "pointer", border: urgency === val ? `2px solid ${u.color}` : "2px solid #cce6f0", background: urgency === val ? `${u.color}15` : "#f5fbfd", transition: "all 0.2s" }}>
                     <div style={{ fontSize: 20, marginBottom: 4 }}>{u.icon}</div>
                     <div style={{ fontWeight: 700, color: urgency === val ? u.color : "#0D3040" }}>{u.label}</div>
                     <div style={{ fontSize: 11.5, color: "#7ab3c4", marginTop: 2 }}>{u.sub}</div>
@@ -286,40 +240,25 @@ export default function UserSubmit() {
               </div>
             </div>
 
-            {/* Referensi Link & Gambar */}
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Referensi Link</label>
-              <input type="url" value={referensiLink} onChange={e => setReferensiLink(e.target.value)} placeholder="https://..."
-                style={{ width: "100%", padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
+              <input type="url" value={referensiLink} onChange={e => setReferensiLink(e.target.value)} placeholder="https://..." style={{ width: "100%", padding: "12px 14px", border: "2px solid #cce6f0", borderRadius: 12, fontSize: 14, background: "#f5fbfd" }} />
             </div>
 
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#0D3040", marginBottom: 8 }}>Referensi Gambar</label>
-              <div onClick={() => fileInputRef.current?.click()} style={{
-                padding: "14px 16px", border: referensiGambar ? "2px solid #0096C7" : "2px dashed #a0d4e8",
-                borderRadius: 12, background: "#f5fbfd", cursor: "pointer", textAlign: "center",
-              }}>
+              <div onClick={() => fileInputRef.current?.click()} style={{ padding: "14px 16px", border: referensiGambar ? "2px solid #0096C7" : "2px dashed #a0d4e8", borderRadius: 12, background: "#f5fbfd", cursor: "pointer", textAlign: "center" }}>
                 <span style={{ fontSize: 22, marginBottom: 6, display: "block" }}>🖼️</span>
-                <span style={{ fontSize: 13, color: referensiGambar ? "#0096C7" : "#7ab3c4" }}>
-                  {referensiGambar ? referensiGambar.name : "Upload gambar / PDF (max 10MB)"}
-                </span>
+                <span style={{ fontSize: 13, color: referensiGambar ? "#0096C7" : "#7ab3c4" }}>{referensiGambar ? referensiGambar.name : "Upload gambar / PDF (max 10MB)"}</span>
               </div>
               <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.pdf" style={{ display: "none" }} onChange={e => setReferensiGambar(e.target.files[0] || null)} />
             </div>
 
           </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting || !title || !kegunaan || !quantity || !pic}
-            style={{
-              width: "100%", padding: "16px", marginTop: 24,
-              background: (isSubmitting || !title || !kegunaan || !quantity || !pic) ? "#b0d4e3" : "linear-gradient(135deg, #0077A8, #0096C7)",
-              color: "#fff", border: "none", borderRadius: 14, fontSize: 16, fontWeight: 700,
-              cursor: (!title || !kegunaan || !quantity || !pic) ? "not-allowed" : "pointer",
-            }}
-          >
-            {isSubmitting ? "Mengirim..." : "📤 Kirim Pengajuan"}
+          <button type="submit" className="submit-btn" disabled={isSubmitting || !title || !kegunaan || !quantity || !pic}
+            style={{ width: "100%", padding: "16px", marginTop: 24, background: (isSubmitting || !title || !kegunaan || !quantity || !pic) ? "#b0d4e3" : "linear-gradient(135deg, #0077A8, #0096C7)", color: "#fff", border: "none", borderRadius: 14, fontSize: 16, fontWeight: 700, cursor: (!title || !kegunaan || !quantity || !pic) ? "not-allowed" : "pointer", boxShadow: "0 4px 14px rgba(0,150,199,0.25)" }}>
+            {isSubmitting ? "Mengirim..." : reorderData ? "🔄 Kirim Reorder" : "📤 Kirim Pengajuan"}
           </button>
         </form>
       </div>
